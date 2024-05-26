@@ -157,7 +157,7 @@ class _TaskitemState extends State<Taskitem> {
             decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(15)),
                 gradient: LinearGradient(
-                    colors: [widget.task.rang, Colors.black87],
+                    colors: [Colors.red, Colors.black87],
                     begin: Alignment.bottomLeft,
                     end: Alignment.topRight))),
       ),

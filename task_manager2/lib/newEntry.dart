@@ -6,24 +6,22 @@ import 'package:http/http.dart' as http;
 import 'package:task_manager2/models/model.dart';
 import 'package:task_manager2/taskList.dart';
 import 'package:task_manager2/widgets/taskItem.dart';
+import 'package:intl/intl.dart';
 
 class NewEntry extends StatefulWidget {
-  NewEntry( {super.key});
+  NewEntry({super.key});
 
   @override
   State<NewEntry> createState() => _NewEntryState();
-  
 }
 
 class _NewEntryState extends State<NewEntry> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  Color currentColor = Colors.blue;
-  Color pickerColor = Color(0xff443a49);
 
   final _taskNameController = TextEditingController();
   final _taskDescriptionController = TextEditingController();
-   late Task task;
+  late Task task;
 
   void timePicker() async {
     final now = TimeOfDay.now();
@@ -55,13 +53,13 @@ class _NewEntryState extends State<NewEntry> {
     }
   }
 
-  void changeColor(Color color) {
-    setState(() {
-      pickerColor = color;
-    });
-  }
+  // void changeColor(Color color) {
+  //   setState(() {
+  //     pickerColor = color;
+  //   });
+  // }
 
-  Future <void> onaddtask() async {
+  Future<void> onaddtask() async {
     if (_taskNameController.text.isEmpty ||
         _taskDescriptionController.text.isEmpty ||
         selectedDate == null ||
@@ -76,46 +74,43 @@ class _NewEntryState extends State<NewEntry> {
         taskname: _taskNameController.text,
         description: _taskDescriptionController.text,
         date: selectedDate!,
-        rang: currentColor,
         hour: selectedTime!.hour,
         min: selectedTime!.minute,
         hourcheck: selectedTime!.hour);
     final url = Uri.https(
-        'task-manager-app-67b0c-default-rtdb.firebaseio.com',
-        '/Tasklist.json');
+        'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
 
     try {
-  final response = await http.post(url,
-      headers: {'Content-type': 'application/json'},
-      body: json.encode({
-        'taskname': task2.taskname,
-        'description': task2.description,
-        'date': task2.date?.toIso8601String(),
-        'rang': task2.rang.toString(),
-        'hour': task2.hour,
-        'min': task2.min,
-        'hourcheck': task2.hourcheck
-      }));
+      final response = await http.post(url,
+          headers: {'Content-type': 'application/json'},
+          body: json.encode({
+            'taskname': task2.taskname,
+            'description': task2.description,
+            'date': task2.date?.toIso8601String(),
+            'hour': task2.hour,
+            'min': task2.min,
+            'hourcheck': task2.hourcheck
+          }));
       print(response.statusCode);
       print(response.body);
 
-      
-       
-      final Map<dynamic,dynamic>resData=json.decode(response.body);
-              task=Task(taskname:resData['taskname'], description: resData['description'], date:resData['date'], hour:resData['hour'] , min: resData['min'], rang: resData['rang'] ,hourcheck:resData['hourcheck']);
-            List<Task> addedtask=[];
-            addedtask.add(task);
-      Navigator.of(context).pop(
-        Tasklist()
-      );
-    
-  
-    // if(response.statusCode==200)
-    //  widget.onaddtask(task2);
-} on Exception catch (e) {
-  print(e);
-}
-        
+      final Map<String, dynamic> resData = json.decode(response.body);
+      task = Task(
+          taskname: resData['taskname'],
+          description: resData['description'],
+          date: resData['date'],
+          hour: resData['hour'],
+          min: resData['min'],
+          hourcheck: resData['hourcheck']);
+      List<Task> addedtask = [];
+      addedtask.add(task);
+      Navigator.of(context).pop(Tasklist());
+
+      // if(response.statusCode==200)
+      //  widget.onaddtask(task2);
+    } on Exception catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -238,69 +233,68 @@ class _NewEntryState extends State<NewEntry> {
               ),
             ),
             SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(
-                  bottom: 15, top: 15, left: 100, right: 90),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    style: BorderStyle.solid,
-                    color: const Color.fromARGB(255, 224, 113, 105),
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-                child: Center(
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          "Pick a Color:",
-                          style: GoogleFonts.lato(
-                            textStyle: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('Pick a color!'),
-                                content: SingleChildScrollView(
-                                  child: ColorPicker(
-                                    pickerColor: pickerColor,
-                                    onColorChanged: changeColor,
-                                  ),
-                                ),
-                                actions: <Widget>[
-                                  ElevatedButton(
-                                    child: Text('Got it'),
-                                    onPressed: () {
-                                      setState(
-                                          () => currentColor = pickerColor);
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        icon: const Icon(Icons.color_lens_outlined),
-                        color: currentColor,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(
+            //       bottom: 15, top: 15, left: 100, right: 90),
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       border: Border.all(
+            //         style: BorderStyle.solid,
+            //         color: const Color.fromARGB(255, 224, 113, 105),
+            //       ),
+            //       borderRadius: BorderRadius.all(Radius.circular(8)),
+            //     ),
+            //     child: Center(
+            //       child: Row(
+            //         children: [
+            //           Padding(
+            //             padding: const EdgeInsets.all(10.0),
+            //             child: Text(
+            //               "Pick a Color:",
+            //               style: GoogleFonts.lato(
+            //                 textStyle: TextStyle(color: Colors.white),
+            //               ),
+            //             ),
+            //           ),
+            //           const Spacer(),
+            //           IconButton(
+            //             onPressed: () {
+            //               showDialog(
+            //                 context: context,
+            //                 builder: (context) {
+            //                   return AlertDialog(
+            //                     title: Text('Pick a color!'),
+            //                     content: SingleChildScrollView(
+            //                       child: ColorPicker(
+            //                         pickerColor: pickerColor,
+            //                         onColorChanged: changeColor,
+            //                       ),
+            //                     ),
+            //                     actions: <Widget>[
+            //                       ElevatedButton(
+            //                         child: Text('Got it'),
+            //                         onPressed: () {
+            //                           setState(
+            //                               () => currentColor = pickerColor);
+            //                           Navigator.of(context).pop();
+            //                         },
+            //                       ),
+            //                     ],
+            //                   );
+            //                 },
+            //               );
+            //             },
+            //             icon: const Icon(Icons.color_lens_outlined),
+            //             color: currentColor,
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
             SizedBox(height: 20),
             TextButton(
               onPressed: () {
-               
                 Navigator.of(context).pop(onaddtask());
               },
               child: Container(

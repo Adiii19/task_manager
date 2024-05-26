@@ -28,7 +28,7 @@ class _TasksscreenState extends State<Tasksscreen>
         date: DateTime.now(),
         hour: 11,
         min: 11,
-        rang: Colors.cyan,
+   
         hourcheck: 11)
   ];
 

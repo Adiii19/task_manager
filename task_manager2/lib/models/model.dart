@@ -10,7 +10,7 @@ required this.description,
  this.date,
 required this .hour,
 required this.min,
-required this.rang,
+
 required this.hourcheck,
 
 }
@@ -25,7 +25,6 @@ required this.hourcheck,
  int min;
  int hourcheck;
 
- Color rang;
 
 String get Formatteddate{
   return formatter.format(date!);
@@ -37,6 +36,6 @@ Task.fromJson(Map<String, dynamic> json)
         date = json['date'] == null ? null : DateTime.parse(json['date']),
         hour = json['hour'] ?? 0,
         min = json['min'] ?? 0,
-        rang = json['rang'] ?? 0,
+     
         hourcheck = json['hourcheck'] ?? false;
 }
