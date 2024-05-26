@@ -4,9 +4,11 @@ import 'package:task_manager2/authScreen.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:task_manager2/newEntry.dart';
 import 'package:task_manager2/tasksScreen.dart';
+import 'package:task_manager2/taskList.dart';
+import 'package:http/http.dart'as http;
 
 class Taskitem extends StatefulWidget {
-  Taskitem(this.task, {super.key});
+  Taskitem(this.task,this.onregisteredtasks, {super.key});
 
   late final Task task;
   late final List<Task> onregisteredtasks;
@@ -46,12 +48,27 @@ class _TaskitemState extends State<Taskitem> {
   //   );
   // }
 
+  removeitem(Task task,List<Task> loadedItems) async {
+   
+
+    final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist/${task.taskname}.json');
+    final response = await http.delete(url);
+
+    if (response.statusCode < 400) {
+       final index = loadedItems.indexOf(task);
+    setState(() {
+      loadedItems.remove(task);
+    });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: InkWell(
+        onDoubleTap: () =>removeitem(widget.task,widget.onregisteredtasks) ,
         onTap: () {
           // edittask(
           //     Task(
@@ -111,10 +128,10 @@ class _TaskitemState extends State<Taskitem> {
                               )),
                         ),
                         Text(
-                          widget.task.Formatteddate,
+                          widget.task.Formatteddate.toString(),
                           style: GoogleFonts.lato(
                             textStyle: const TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontWeight: FontWeight.w500,
                                 fontSize: 25),
                           ),
@@ -126,10 +143,10 @@ class _TaskitemState extends State<Taskitem> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '${widget.task.hour}:${widget.task.min}',
+                              '${widget.task.hour.toString()}:${widget.task.min.toString()}',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 25),
                               ),
@@ -141,7 +158,7 @@ class _TaskitemState extends State<Taskitem> {
                               widget.task.hourcheck < 12 ? 'AM' : 'PM',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
-                                    color: Colors.white,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.w500,
                                     fontSize: 25),
                               ),

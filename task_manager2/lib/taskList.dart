@@ -13,6 +13,8 @@ class Tasklist extends StatefulWidget {
 }
 
 class _TasklistState extends State<Tasklist> {
+
+   final List<Task> loadedItems = [];
   Future<List<Task>> loadItems() async {
     final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
     final response = await http.get(url);
@@ -24,7 +26,7 @@ class _TasklistState extends State<Tasklist> {
       return [];
     }
 
-    final List<Task> loadedItems = [];
+   
     final Map<String, dynamic> listData = json.decode(response.body);
     listData.forEach((key, value) {
       loadedItems.add(Task.fromJson(value));
@@ -32,6 +34,10 @@ class _TasklistState extends State<Tasklist> {
 
     return loadedItems;
   }
+
+    
+
+   
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +55,14 @@ class _TasklistState extends State<Tasklist> {
         final tasks = snapshot.data!;
 
         return ListView.builder(
+
           itemCount: tasks.length,
           itemBuilder: (ctx, index) => Dismissible(
             key: ValueKey(tasks[index]),
-            child: Taskitem(tasks[index]),
+            child: Taskitem(tasks[index],tasks),
+           
+
+            
           ),
         );
       },
