@@ -7,68 +7,24 @@ import 'package:task_manager2/tasksScreen.dart';
 import 'package:task_manager2/taskList.dart';
 import 'package:http/http.dart'as http;
 
-class Taskitem extends StatefulWidget {
-  Taskitem(this.task,this.onregisteredtasks, {super.key});
+class Taskitem extends StatelessWidget {
+  Taskitem(this.task,{super.key});
 
   late final Task task;
-  late final List<Task> onregisteredtasks;
+   //final Function(Task) onremove;
 
-  @override
-  State<Taskitem> createState() => _TaskitemState();
-}
-
-class _TaskitemState extends State<Taskitem> {
   late AnimationController controller;
 
   late Animation<Offset> offsetAnimation;
 
   // void edittask(Task task, int index) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     useSafeArea: true,
-  //     isScrollControlled: true,
-  //      sheetAnimationStyle: AnimationStyle(
-  //           curve: Curves.bounceInOut, duration: Durations.long2),
-       
-  //     backgroundColor: const Color.fromARGB(255, 24, 24, 24),
-  //     builder: (BuildContext context) => NewEntry(
-  //       (updatedTask) {
-  //         setState(() {
-  //           // widget.edittask(updatedTask, index);
-  //           widget.task.taskname = updatedTask.taskname;
-  //           widget.task.description = updatedTask.description;
-  //           widget.task.date = updatedTask.date;
-  //           widget.task.hour = updatedTask.hour;
-  //           widget.task.min = updatedTask.min;
-  //           widget.task.rang = updatedTask.rang;
-  //           widget.task.hourcheck = updatedTask.hourcheck;
-  //         });
-  //       },
-  //     ),
-  //   );
-  // }
-
-  removeitem(Task task,List<Task> loadedItems) async {
-   
-
-    final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist/${task.taskname}.json');
-    final response = await http.delete(url);
-
-    if (response.statusCode < 400) {
-       final index = loadedItems.indexOf(task);
-    setState(() {
-      loadedItems.remove(task);
-    });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: InkWell(
-        onDoubleTap: () =>removeitem(widget.task,widget.onregisteredtasks) ,
+       // onDoubleTap: () => onremove,
         onTap: () {
           // edittask(
           //     Task(
@@ -92,7 +48,7 @@ class _TaskitemState extends State<Taskitem> {
               child: Column(
                 children: [
                   Text(
-                    widget.task.taskname,
+                    task.taskname,
                     style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           color: Colors.white,
@@ -101,7 +57,7 @@ class _TaskitemState extends State<Taskitem> {
                     ),
                   ),
                   Text(
-                    widget.task.description,
+                    task.description,
                     style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           color: Colors.white,
@@ -128,7 +84,7 @@ class _TaskitemState extends State<Taskitem> {
                               )),
                         ),
                         Text(
-                          widget.task.Formatteddate.toString(),
+                          task.Formatteddate.toString(),
                           style: GoogleFonts.lato(
                             textStyle: const TextStyle(
                                 color: Colors.black,
@@ -143,7 +99,7 @@ class _TaskitemState extends State<Taskitem> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '${widget.task.hour.toString()}:${widget.task.min.toString()}',
+                              '${task.hour.toString()}:${task.min.toString()}',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
                                     color: Colors.black,
@@ -155,7 +111,7 @@ class _TaskitemState extends State<Taskitem> {
                               width: 2,
                             ),
                             Text(
-                              widget.task.hourcheck < 12 ? 'AM' : 'PM',
+                              task.hourcheck < 12 ? 'AM' : 'PM',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
                                     color: Colors.black,

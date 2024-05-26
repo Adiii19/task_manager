@@ -10,7 +10,7 @@ required this.description,
  this.date,
 required this .hour,
 required this.min,
-
+required this.id,
 required this.hourcheck,
 
 }
@@ -24,6 +24,7 @@ required this.hourcheck,
  int  hour;
  int min;
  int hourcheck;
+ String id;
 
 
 String get Formatteddate{
@@ -36,6 +37,7 @@ Task.fromJson(Map<String, dynamic> json)
         date = json['date'] == null ? null : DateTime.parse(json['date']),
         hour = json['hour'] ?? 0,
         min = json['min'] ?? 0,
-     
+        id=json['taskname'],
         hourcheck = json['hourcheck'] ?? false;
+        
 }

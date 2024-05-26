@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:firebase_database/firebase_database.dart';
 import 'widgets/taskItem.dart';
 
 class Tasklist extends StatefulWidget {
@@ -13,9 +13,10 @@ class Tasklist extends StatefulWidget {
 }
 
 class _TasklistState extends State<Tasklist> {
+  final DatabaseReference databaseref = FirebaseDatabase.instance.ref().child('Tasklist');
+  List<Task> loadedItems = [];
 
-   final List<Task> loadedItems = [];
-  Future<List<Task>> loadItems() async {
+  Future<void> loadItems() async {
     final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
     final response = await http.get(url);
     if (response.statusCode >= 400) {
@@ -23,47 +24,65 @@ class _TasklistState extends State<Tasklist> {
     }
 
     if (response.body == 'null') {
-      return [];
+      setState(() {
+        loadedItems = [];
+      });
+      return;
     }
 
-   
     final Map<String, dynamic> listData = json.decode(response.body);
-    listData.forEach((key, value) {
-      loadedItems.add(Task.fromJson(value));
+    final List<Task> tasks = listData.values.map((value) => Task.fromJson(value)).toList();
+
+    setState(() {
+      loadedItems = tasks;
     });
-
-    return loadedItems;
   }
+ 
+ Future<void> removeItem(Task task) async {
+  var key = task.taskname;
+  try {
+    await databaseref.child(key).remove();
+    setState(() {
+      loadedItems.remove(task);
+    });
+  } catch (error) {
+    // Handle error if needed
+    print("Failed to remove task: $error");
+    // You can also show a snackbar or dialog to inform the user about the error
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text("Failed to remove task"),
+    //   ),
+    // );
+  }
+}
 
-    
+  
 
-   
+  @override
+  void initState() {
+    super.initState();
+    loadItems();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Task>>(
-      future: loadItems(),
-      builder: (ctx, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No tasks found.'));
-        }
+    if (loadedItems.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
 
-        final tasks = snapshot.data!;
-
-        return ListView.builder(
-
-          itemCount: tasks.length,
-          itemBuilder: (ctx, index) => Dismissible(
-            key: ValueKey(tasks[index]),
-            child: Taskitem(tasks[index],tasks),
-           
-
-            
-          ),
+    return ListView.builder(
+      itemCount: loadedItems.length,
+      itemBuilder: (ctx, index) {
+        final task = loadedItems[index];
+        return Dismissible(
+          key: ValueKey(task.taskname),
+          direction: DismissDirection.horizontal,
+          onDismissed: (direction) {
+            removeItem(task);
+          },
+          child: Taskitem(task),
+          background: Container(color: Colors.red),
         );
       },
     );

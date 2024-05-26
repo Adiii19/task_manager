@@ -76,7 +76,8 @@ class _NewEntryState extends State<NewEntry> {
         date: selectedDate!,
         hour: selectedTime!.hour,
         min: selectedTime!.minute,
-        hourcheck: selectedTime!.hour);
+        hourcheck: selectedTime!.hour,
+        id: _taskNameController.text);
     final url = Uri.https(
         'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
 
@@ -101,7 +102,9 @@ class _NewEntryState extends State<NewEntry> {
           date: resData['date'],
           hour: resData['hour'],
           min: resData['min'],
-          hourcheck: resData['hourcheck']);
+          hourcheck: resData['hourcheck'],
+          id:resData['taskname'] );
+          
       List<Task> addedtask = [];
       addedtask.add(task);
       Navigator.of(context).pop(Tasklist());
