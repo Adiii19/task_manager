@@ -98,13 +98,15 @@ class _NewEntryState extends State<NewEntry> {
       }));
       print(response.statusCode);
       print(response.body);
+
+      
        
       final Map<dynamic,dynamic>resData=json.decode(response.body);
               task=Task(taskname:resData['taskname'], description: resData['description'], date:resData['date'], hour:resData['hour'] , min: resData['min'], rang: resData['rang'] ,hourcheck:resData['hourcheck']);
             List<Task> addedtask=[];
             addedtask.add(task);
       Navigator.of(context).pop(
-        Tasklist(addedtask)
+        Tasklist()
       );
     
   

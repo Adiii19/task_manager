@@ -7,7 +7,7 @@ class Task{
 Task(
 { required this.taskname,
 required this.description,
-required this.date,
+ this.date,
 required this .hour,
 required this.min,
 required this.rang,

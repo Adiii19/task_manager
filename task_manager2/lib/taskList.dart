@@ -1,81 +1,61 @@
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:core';
 import 'package:flutter/material.dart';
-import 'package:task_manager2/newEntry.dart';
-import 'package:task_manager2/widgets/taskItem.dart';
 import 'package:task_manager2/models/model.dart';
-import 'package:task_manager2/tasksScreen.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'widgets/taskItem.dart';
 
 class Tasklist extends StatefulWidget {
+  Tasklist({super.key});
 
-  Tasklist(this.tasks,{super.key});
-  
-    
-    final List<Task> tasks ;
   @override
   State<Tasklist> createState() => _TasklistState();
 }
 
 class _TasklistState extends State<Tasklist> {
-  
-      List<Task>onregisteredtasks=[];
-      
-  var isloading=true;
-  String? error;
-
-   @override
-  void initState() {
-    super.initState();
-   onregisteredtasks = widget.tasks;
-    loaditem();
-  }
-
-
-  Future<void>  loaditem () async {
-
-    final url=Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com',
-        '/Tasklist.json');
-    final response=await http.get(url);
-    if(response.statusCode>400)
-    {
-      setState(() {
-        error='Failed to fetch data. Please try again.';
-      });
+  Future<List<Task>> loadItems() async {
+    final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
+    final response = await http.get(url);
+    if (response.statusCode >= 400) {
+      throw Exception('Failed to fetch data. Please try again.');
     }
 
-   if(response.body=='null')
-   {
-      setState(() {
-        isloading=false;
+    if (response.body == 'null') {
+      return [];
+    }
 
-      });
-      return;
-   }
-     final List<Task> loadeditems=[];
-     final Map<dynamic,dynamic> listdata=json.decode(response.body);
-      for (final item in listdata.entries)
-      {
-        loadeditems.add(Task(taskname: item.value['taskname'], description: item.value['description'], date:  DateTime.parse(item.value['date']), hour: item.value['hour'], min: item.value['min'], rang: item.value['rang'], hourcheck: item.value['hourcheck']));
-      }
-      
-      setState(() {
-       
-        onregisteredtasks=loadeditems;
-         isloading=false;
-      });
+    final List<Task> loadedItems = [];
+    final Map<String, dynamic> listData = json.decode(response.body);
+    listData.forEach((key, value) {
+      loadedItems.add(Task.fromJson(value));
+    });
+
+    return loadedItems;
   }
 
   @override
   Widget build(BuildContext context) {
-   
-    return ListView.builder(
-        itemCount: onregisteredtasks.length,
-        itemBuilder: (ctx, index)=>Dismissible(key: ValueKey(onregisteredtasks[index].taskname),
-              
-              child: Taskitem(onregisteredtasks[index]),
-             // onDismissed: (direction) => widget.onremovetask(onregisteredtasks[index]),
-            ));
+    return FutureBuilder<List<Task>>(
+      future: loadItems(),
+      builder: (ctx, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No tasks found.'));
+        }
+
+        final tasks = snapshot.data!;
+
+        return ListView.builder(
+          itemCount: tasks.length,
+          itemBuilder: (ctx, index) => Dismissible(
+            key: ValueKey(tasks[index]),
+            child: Taskitem(tasks[index]),
+          ),
+        );
+      },
+    );
   }
 }

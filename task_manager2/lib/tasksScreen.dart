@@ -150,7 +150,7 @@ class _TasksscreenState extends State<Tasksscreen>
           Expanded(
               child: SlideTransition(
                   position: offsetAnimation2,
-                  child: Tasklist(registeredtasks))),
+                  child: Tasklist())),
         ],
       ),
     );

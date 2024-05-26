@@ -87,7 +87,7 @@ class _TaskitemState extends State<Taskitem> {
                     widget.task.description,
                     style: GoogleFonts.lato(
                       textStyle: const TextStyle(
-                          color: Color.fromARGB(214, 255, 255, 255),
+                          color: Colors.white,
                           fontWeight: FontWeight.w400,
                           fontSize: 25),
                     ),
@@ -98,14 +98,14 @@ class _TaskitemState extends State<Taskitem> {
                   Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: Color.fromARGB(72, 236, 232, 232)),
+                        color: Colors.white),
                     child: Column(
                       children: [
                         Center(
                           child: Text('Deadline:',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
-                                    color: Color.fromARGB(255, 231, 104, 95),
+                                    color: Colors.pink,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 25),
                               )),
