@@ -19,42 +19,53 @@ class _TasklistState extends State<Tasklist> {
   final DatabaseReference databaseref = FirebaseDatabase.instance.ref().child('Tasklist');
   List<Task> loadedItems = [];
   
-  
-  
-
-  Future<void> loadItems() async {
+  Future<void> loadItems() async { 
     
     final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
     final response = await http.get(url);
     if (response.statusCode >= 400) {
-      throw Exception('Failed to fetch data. Please try again.');
+      print('Failed to fetch data. Please try again.');
     }
 
     if (response.body == 'null') {
+      print("BOdy null");
       setState(() {
         loadedItems = [];
       });
-     return;
+     
     }
+ 
+    Map<String, dynamic>? data;
+  try {
+    data = json.decode(response.body) as Map<String, dynamic>?;
+  } catch (e) {
+    throw Exception('Failed to parse data. Please try again.');
+  }
 
-    final Map<String, dynamic> listData = json.decode(response.body);
-        final List<Task> tasks = listData.entries.map((entry) {
-      final taskData = entry.value as Map<String, dynamic>;
-      return Task.fromJson({...taskData,'id' : entry.key});
-    }).toList();
+  if (data == null) {
+    setState(() {
+      loadedItems = [];
+    });
+    return;
+  }
+
+  final List<Task> tasks = data.values.map((value) => Task.fromJson(value)).toList();
 
 
-    setState(()  {
+    setState(() {
       loadedItems = tasks;
     });
+
+   
   }
  
  Future<void> removeItem(Task task) async {
   var key = task.id;
   try {
     await databaseref.child(key).remove();
+    loadedItems.remove(task);
     setState(() {
-      loadedItems.remove(task);
+   
     });
   } catch (error) {
     // Handle error if needed
@@ -65,21 +76,26 @@ class _TasklistState extends State<Tasklist> {
  
  }
   @override
-  void initState() {
+  void initState(){
     super.initState();
-    loadItems();
+     loadItems();
   }
 
   @override
   Widget build(BuildContext context) {
     if (loadedItems.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: Text("No tasks here. Kindly add your tasks",style: TextStyle(
+        color: Colors.grey
+      ),));
+       // ignore: dead_code
+       
     }
+   
 
     return ListView.builder(
       itemCount: loadedItems.length,
       itemBuilder: (ctx, index) {
-        //loadedItems.add(widget.taskcurrent);
+        
         final task = loadedItems[index];
         return Dismissible(
           key: ValueKey(task.id),

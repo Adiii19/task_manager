@@ -91,6 +91,7 @@ class _NewEntryState extends State<NewEntry> {
             'hour': task2.hour,
             'min': task2.min,
             'hourcheck': task2.hourcheck,
+            
           
           }));
       print(response.statusCode);
@@ -100,17 +101,17 @@ class _NewEntryState extends State<NewEntry> {
       final Map<String, dynamic> resData = json.decode(response.body);
       
           
-      // List<Task> addedtask = [];
-      // addedtask.add(task);
+      List<Task> addedtask = [];
+      addedtask.add(task);
       
       Navigator.of(context).pop(
        Task(
-          taskname: resData['taskname'],
-          description: resData['description'],
-          date: resData['date'],
-          hour: resData['hour'],
-          min: resData['min'],
-          hourcheck: resData['hourcheck'],
+          taskname: _taskNameController.toString(),
+          description: _taskDescriptionController.toString(),
+          date: selectedDate,
+          hour: selectedTime!.hour,
+          min: selectedTime!.minute,
+          hourcheck: selectedTime!.hour.toInt(),
           id:resData['name'] )
       );
 

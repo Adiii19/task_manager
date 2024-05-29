@@ -21,16 +21,16 @@ class _TasksscreenState extends State<Tasksscreen>
   late Animation<double> _animation =
       CurvedAnimation(parent: controller2, curve: Curves.easeIn);
 
-  List<Task> registeredtasks = [
-    Task(
+
+   Task Temp= Task(
         taskname: 'Task 1',
         description: 'descr',
         date: DateTime.now(),
         hour: 11,
         min: 11,
         id: '09',
-        hourcheck: 11)
-  ];
+        hourcheck: 11);
+  
 
   // void removetask(Task task) {
   //   setState(() {
@@ -151,14 +151,7 @@ class _TasksscreenState extends State<Tasksscreen>
             child: SlideTransition(
               position: offsetAnimation2,
               child: Tasklist(
-                Task(
-                    taskname: 'temp',
-                    description: 'des',
-                    date: DateTime.now(),
-                    hour: DateTime.now().hour,
-                    min: DateTime.now().minute,
-                    hourcheck: DateTime.now().hour,
-                    id: 'str'),
+                 Temp
               ),
             ),
           ),
