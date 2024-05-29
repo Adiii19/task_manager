@@ -59,78 +59,63 @@ class _NewEntryState extends State<NewEntry> {
   //   });
   // }
 
-  Future<void> onaddtask() async {
-    if (_taskNameController.text.isEmpty ||
-        _taskDescriptionController.text.isEmpty ||
-        selectedDate == null ||
-        selectedTime == null) {
-      // Show an error message or a snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields')),
-      );
-      return;
-
-    }
-    if(!mounted) return;
-    final task2 = Task(
-        taskname: _taskNameController.text,
-        description: _taskDescriptionController.text,
-        date: selectedDate!,
-        hour: selectedTime!.hour,
-        min: selectedTime!.minute,
-        hourcheck: selectedTime!.hour,
-        id: _taskNameController.text);
-    final url = Uri.https(
-        'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
-
-    try {
-      final response = await http.post(url,
-          headers: {'Content-type': 'application/json'},
-          body: json.encode({
-            'taskname': task2.taskname,
-            'description': task2.description,
-            'date': task2.date?.toIso8601String(),
-            'hour': task2.hour,
-            'min': task2.min,
-            'hourcheck': task2.hourcheck,
-            
-          
-          }));
-      print(response.statusCode);
-      print(response.body);
-
-       
-      final Map<String, dynamic> resData = json.decode(response.body);
-      
-          final Task task= Task(
-          taskname: _taskNameController.toString(),
-          description: _taskDescriptionController.toString(),
-          date: selectedDate,
-          hour: selectedTime!.hour,
-          min: selectedTime!.minute,
-          hourcheck: selectedTime!.hour.toInt(),
-          id:resData['name'] );
-
-
-      // List<Task> addedtask = [];
-      // addedtask.add(task);
-      
-      setState(() {
-          Navigator.of(context).pop(
-  
-            task
-          );
-               });
-      print('ID:${resData['name']}');
-
-      
-
-      // if(response.statusCode==200)
-      //  widget.onaddtask(task2);
-    } on Exception catch (e) {
-      print(e);
-    }
+ Future<void> onaddtask() async {
+  if (_taskNameController.text.isEmpty ||
+      _taskDescriptionController.text.isEmpty ||
+      selectedDate == null ||
+      selectedTime == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Please fill all fields')),
+    );
+    return;
   }
+
+  final task2 = Task(
+    taskname: _taskNameController.text,
+    description: _taskDescriptionController.text,
+    date: selectedDate!,
+    hour: selectedTime!.hour,
+    min: selectedTime!.minute,
+    hourcheck: selectedTime!.hour,
+    id: '' // This will be set after the task is created in the database
+  );
+
+  final url = Uri.https(
+      'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-type': 'application/json'},
+      body: json.encode({
+        'taskname': task2.taskname,
+        'description': task2.description,
+        'date': task2.date?.toIso8601String(),
+        'hour': task2.hour,
+        'min': task2.min,
+        'hourcheck': task2.hourcheck,
+      }),
+    );
+
+    final Map<String, dynamic> resData = json.decode(response.body);
+    final newTask = Task(
+      taskname: _taskNameController.text,
+      description: _taskDescriptionController.text,
+      date: selectedDate,
+      hour: selectedTime!.hour,
+      min: selectedTime!.minute,
+      hourcheck: selectedTime!.hour.toInt(),
+      id: resData['name']
+    );
+
+    if (mounted) {
+      Navigator.of(context).pop(newTask);
+    }
+  } catch (e) {
+    print(e);
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
