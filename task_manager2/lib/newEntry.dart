@@ -21,7 +21,7 @@ class _NewEntryState extends State<NewEntry> {
 
   final _taskNameController = TextEditingController();
   final _taskDescriptionController = TextEditingController();
-  late Task task;
+  //final Task task=Task(taskname: '', description: '', hour: 0, min: 0, id:'', hourcheck: 0);
 
   void timePicker() async {
     final now = TimeOfDay.now();
@@ -69,7 +69,9 @@ class _NewEntryState extends State<NewEntry> {
         SnackBar(content: Text('Please fill all fields')),
       );
       return;
+
     }
+    if(!mounted) return;
     final task2 = Task(
         taskname: _taskNameController.text,
         description: _taskDescriptionController.text,
@@ -100,20 +102,28 @@ class _NewEntryState extends State<NewEntry> {
        
       final Map<String, dynamic> resData = json.decode(response.body);
       
-          
-      List<Task> addedtask = [];
-      addedtask.add(task);
-      
-      Navigator.of(context).pop(
-       Task(
+          final Task task= Task(
           taskname: _taskNameController.toString(),
           description: _taskDescriptionController.toString(),
           date: selectedDate,
           hour: selectedTime!.hour,
           min: selectedTime!.minute,
           hourcheck: selectedTime!.hour.toInt(),
-          id:resData['name'] )
-      );
+          id:resData['name'] );
+
+
+      // List<Task> addedtask = [];
+      // addedtask.add(task);
+      
+      setState(() {
+          Navigator.of(context).pop(
+  
+            task
+          );
+               });
+      print('ID:${resData['name']}');
+
+      
 
       // if(response.statusCode==200)
       //  widget.onaddtask(task2);
@@ -304,7 +314,7 @@ class _NewEntryState extends State<NewEntry> {
             SizedBox(height: 20),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(onaddtask());
+                onaddtask();
               },
               child: Container(
                 width: 300,

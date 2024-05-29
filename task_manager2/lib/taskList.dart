@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:http/http.dart' as http;
@@ -19,8 +21,36 @@ class _TasklistState extends State<Tasklist> {
   final DatabaseReference databaseref = FirebaseDatabase.instance.ref().child('Tasklist');
   List<Task> loadedItems = [];
   
-  Future<void> loadItems() async { 
+  late StreamSubscription _subscription;
+  
+   @override
+  void initState(){
+    super.initState();
     
+     loadItems();
+  }
+
+  @override
+  void dispose(){
+    _subscription.cancel();
+    super.dispose();
+  }
+
+
+  Future<void> loadItems() async { 
+
+
+    _subscription = databaseref.onChildAdded.listen((event) {
+  // Update the UI when a new child is added to the database
+  final dynamic value = event.snapshot.value;
+  if (value != null && value is Map<String, dynamic>) {
+    final newTask = Task.fromJson(value);
+    setState(() {
+      loadedItems.add(newTask);
+    });
+  }
+});
+
     final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
     final response = await http.get(url);
     if (response.statusCode >= 400) {
@@ -51,11 +81,20 @@ class _TasklistState extends State<Tasklist> {
 
   final List<Task> tasks = data.values.map((value) => Task.fromJson(value)).toList();
 
-
+  tasks.add(widget.taskcurrent);
     setState(() {
+      
       loadedItems = tasks;
+      
     });
-
+  
+    // Subscribe to changes in the database
+    _subscription = databaseref.onChildRemoved.listen((event) {
+      // Update the UI when a child is removed from the database
+      setState(() {
+        loadedItems.removeWhere((task) => task.id == event.snapshot.key);
+      });
+    });
    
   }
  
@@ -63,9 +102,9 @@ class _TasklistState extends State<Tasklist> {
   var key = task.id;
   try {
     await databaseref.child(key).remove();
-    loadedItems.remove(task);
+ 
     setState(() {
-   
+      loadedItems.remove(task);
     });
   } catch (error) {
     // Handle error if needed
@@ -75,11 +114,7 @@ class _TasklistState extends State<Tasklist> {
 
  
  }
-  @override
-  void initState(){
-    super.initState();
-     loadItems();
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
