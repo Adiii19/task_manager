@@ -90,24 +90,29 @@ class _NewEntryState extends State<NewEntry> {
             'date': task2.date?.toIso8601String(),
             'hour': task2.hour,
             'min': task2.min,
-            'hourcheck': task2.hourcheck
+            'hourcheck': task2.hourcheck,
+          
           }));
       print(response.statusCode);
       print(response.body);
 
+       
       final Map<String, dynamic> resData = json.decode(response.body);
-      task = Task(
+      
+          
+      // List<Task> addedtask = [];
+      // addedtask.add(task);
+      
+      Navigator.of(context).pop(
+       Task(
           taskname: resData['taskname'],
           description: resData['description'],
           date: resData['date'],
           hour: resData['hour'],
           min: resData['min'],
           hourcheck: resData['hourcheck'],
-          id:resData['taskname'] );
-          
-      List<Task> addedtask = [];
-      addedtask.add(task);
-      Navigator.of(context).pop(Tasklist());
+          id:resData['name'] )
+      );
 
       // if(response.statusCode==200)
       //  widget.onaddtask(task2);

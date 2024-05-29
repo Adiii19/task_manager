@@ -71,7 +71,7 @@ class Taskitem extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: Colors.white),
+                        color: Colors.transparent),
                     child: Column(
                       children: [
                         Center(

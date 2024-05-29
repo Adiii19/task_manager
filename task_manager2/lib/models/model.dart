@@ -37,7 +37,7 @@ Task.fromJson(Map<String, dynamic> json)
         date = json['date'] == null ? null : DateTime.parse(json['date']),
         hour = json['hour'] ?? 0,
         min = json['min'] ?? 0,
-        id=json['taskname'],
+        id=json['name'],
         hourcheck = json['hourcheck'] ?? false;
         
 }

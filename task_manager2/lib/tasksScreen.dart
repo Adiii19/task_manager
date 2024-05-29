@@ -29,7 +29,6 @@ class _TasksscreenState extends State<Tasksscreen>
         hour: 11,
         min: 11,
         id: '09',
-   
         hourcheck: 11)
   ];
 
@@ -149,9 +148,20 @@ class _TasksscreenState extends State<Tasksscreen>
             ),
           ),
           Expanded(
-              child: SlideTransition(
-                  position: offsetAnimation2,
-                  child: Tasklist())),
+            child: SlideTransition(
+              position: offsetAnimation2,
+              child: Tasklist(
+                Task(
+                    taskname: 'temp',
+                    description: 'des',
+                    date: DateTime.now(),
+                    hour: DateTime.now().hour,
+                    min: DateTime.now().minute,
+                    hourcheck: DateTime.now().hour,
+                    id: 'str'),
+              ),
+            ),
+          ),
         ],
       ),
     );

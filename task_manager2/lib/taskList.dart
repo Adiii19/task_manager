@@ -6,17 +6,24 @@ import 'package:firebase_database/firebase_database.dart';
 import 'widgets/taskItem.dart';
 
 class Tasklist extends StatefulWidget {
-  Tasklist({super.key});
+  Tasklist(this.taskcurrent,{super.key});
+
+    final  Task taskcurrent;
 
   @override
   State<Tasklist> createState() => _TasklistState();
 }
 
+
 class _TasklistState extends State<Tasklist> {
   final DatabaseReference databaseref = FirebaseDatabase.instance.ref().child('Tasklist');
   List<Task> loadedItems = [];
+  
+  
+  
 
   Future<void> loadItems() async {
+    
     final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
     final response = await http.get(url);
     if (response.statusCode >= 400) {
@@ -27,19 +34,23 @@ class _TasklistState extends State<Tasklist> {
       setState(() {
         loadedItems = [];
       });
-      return;
+     return;
     }
 
     final Map<String, dynamic> listData = json.decode(response.body);
-    final List<Task> tasks = listData.values.map((value) => Task.fromJson(value)).toList();
+        final List<Task> tasks = listData.entries.map((entry) {
+      final taskData = entry.value as Map<String, dynamic>;
+      return Task.fromJson({...taskData,'id' : entry.key});
+    }).toList();
 
-    setState(() {
+
+    setState(()  {
       loadedItems = tasks;
     });
   }
  
  Future<void> removeItem(Task task) async {
-  var key = task.taskname;
+  var key = task.id;
   try {
     await databaseref.child(key).remove();
     setState(() {
@@ -48,17 +59,11 @@ class _TasklistState extends State<Tasklist> {
   } catch (error) {
     // Handle error if needed
     print("Failed to remove task: $error");
-    // You can also show a snackbar or dialog to inform the user about the error
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text("Failed to remove task"),
-    //   ),
-    // );
-  }
+  
 }
 
-  
-
+ 
+ }
   @override
   void initState() {
     super.initState();
@@ -74,9 +79,10 @@ class _TasklistState extends State<Tasklist> {
     return ListView.builder(
       itemCount: loadedItems.length,
       itemBuilder: (ctx, index) {
+        //loadedItems.add(widget.taskcurrent);
         final task = loadedItems[index];
         return Dismissible(
-          key: ValueKey(task.taskname),
+          key: ValueKey(task.id),
           direction: DismissDirection.horizontal,
           onDismissed: (direction) {
             removeItem(task);
@@ -87,4 +93,9 @@ class _TasklistState extends State<Tasklist> {
       },
     );
   }
-}
+
+ }
+
+
+  
+
