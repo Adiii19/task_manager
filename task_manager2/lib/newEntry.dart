@@ -60,63 +60,76 @@ class _NewEntryState extends ConsumerState<NewEntry> {
   //   });
   // }
 
- Future<void> onaddtask() async {
-  if (_taskNameController.text.isEmpty ||
-      _taskDescriptionController.text.isEmpty ||
-      selectedDate == null ||
-      selectedTime == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Please fill all fields')),
-    );
-    return;
-  }
+  Future<void> onaddtask() async {
+    if (_taskNameController.text.isEmpty ||
+        _taskDescriptionController.text.isEmpty ||
+        selectedDate == null ||
+        selectedTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
 
-  final task = Task(
-    taskname: _taskNameController.text,
-    description: _taskDescriptionController.text,
-    date: selectedDate!,
-    hour: selectedTime!.hour,
-    min: selectedTime!.minute,
-    hourcheck: selectedTime!.hour,
-    id: '' // This will be set after the task is created in the database
-  );
+    final task = Task(
+        taskname: _taskNameController.text,
+        description: _taskDescriptionController.text,
+        date: selectedDate!,
+        hour: selectedTime!.hour,
+        min: selectedTime!.minute,
+        hourcheck: selectedTime!.hour,
+        id: '' // This will be set after the task is created in the database
+        );
 
-  final url = Uri.https(
-      'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
+    final url = Uri.https(
+        'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {'Content-type': 'application/json'},
-      body: json.encode({
-        'taskname': task.taskname,
-        'description': task.description,
-        'date': task.date?.toIso8601String(),
-        'hour': task.hour,
-        'min': task.min,
-        'hourcheck': task.hourcheck,
-        'id':''
-        
-      }),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-type': 'application/json'},
+        body: json.encode({
+          'taskname': _taskNameController.text,
+          'description': _taskDescriptionController.text,
+          'date': selectedDate!.toIso8601String(),
+          'hour': selectedTime!.hour,
+          'min': selectedTime!.minute,
+          'hourcheck': selectedTime!.hour,
+          'id':''
+        }),
+      );
 
-    final Map<String, dynamic> resData = json.decode(response.body)as Map<String,dynamic>;
+      final jsondata=json.decode(response.body);
 
-    final newtask=Task(taskname: resData['taskname'], description: resData['description'], hour: resData['hour'], min: resData['min'], id: resData['name'], hourcheck: resData['hourcheck']);
+     List<Task> tasks=[];
 
-    await ref.read(taskprovider.notifier).addTask(newtask); //here the task is getting added to the state list in the provider
+     for(var item in jsondata){
 
+        Task task= Task(taskname: item['taskname'], description: item['description'], hour: item['hour'], min: item['min'], id: item['id'], hourcheck: item['hourcheck']);
+        tasks.add(task);
+     }  
     
-      Navigator.of(context).pop();
-    
-  } catch (e) {
-    print(e);
-  }
-}
+    for(var task in tasks)
+    {
+      ref.read(taskprovider.notifier).addTask(task);
+    } //here the task is getting added to the state list in the provider
 
+      if (mounted) {
+        Navigator.of(context).pop();
+      } else {
+        throw Exception("Failed to retrieve task ID from database.");
+      }
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add task. Please try again.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final tasknotifier = ref.watch(taskprovider.notifier);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(15.0),

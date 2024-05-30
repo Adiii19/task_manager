@@ -21,9 +21,9 @@ required this.hourcheck,
  String taskname;
  String description;
  DateTime? date;
- int  hour;
- int min;
- int hourcheck;
+ int?  hour;
+ int ?min;
+ int ?hourcheck;
  String id;
 
 
@@ -31,7 +31,7 @@ String get Formatteddate{
   return formatter.format(date!);
 }
 
-Task.fromJson(Map<String, dynamic> json)
+Task.fromJson(Map<String, dynamic> json, {required taskname})
       : taskname = json['taskname'] ?? '',
         description = json['description'] ?? '',
         date = json['date'] == null ? null : DateTime.parse(json['date']),

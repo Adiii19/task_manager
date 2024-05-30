@@ -111,7 +111,7 @@ class Taskitem extends StatelessWidget {
                               width: 2,
                             ),
                             Text(
-                              task.hourcheck < 12 ? 'AM' : 'PM',
+                              task.hourcheck! < 12 ? 'AM' : 'PM',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
                                     color: Colors.black,

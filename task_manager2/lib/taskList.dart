@@ -47,8 +47,20 @@ class _TasklistState extends ConsumerState<Tasklist> {
       return;
     }
 
-             print(response.body);
+     final jsondata=json.decode(response.body);
 
+     List<Task> tasks=[];
+
+     for(var item in jsondata){
+
+        Task task= Task(taskname: item['taskname'], description: item['description'], hour: item['hour'], min: item['min'], id: item['id'], hourcheck: item['hourcheck']);
+        tasks.add(task);
+     }  
+    
+    for(var task in tasks)
+    {
+      ref.read(taskprovider.notifier).addTask(task);
+    }
     
 
    
@@ -72,12 +84,12 @@ class _TasklistState extends ConsumerState<Tasklist> {
   
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context,) {
 
     final taskState=ref.watch(taskprovider);
-    final Tasknotifier=ref.watch(taskprovider.notifier);
+    final taskNotifier=ref.read(taskprovider.notifier);
 
-    if (loadedItems.isEmpty) {
+    if (taskState.isEmpty) {
       return Center(child: Text("No tasks here. Kindly add your tasks", style: TextStyle(
         color: Colors.grey
       ),));
