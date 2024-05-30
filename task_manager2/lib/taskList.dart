@@ -52,11 +52,11 @@ class _TasklistState extends ConsumerState<Tasklist> {
       final Task task = Task(
           taskname: entry.value['taskname'],
           description: entry.value['description'],
-          date: entry.value['date'],
-          hour: entry.value['hour'],
-          min: entry.value['min'],
+          date:DateTime.parse(entry.value['date']),
+          hour: entry.value['hour'] as int,
+          min: entry.value['min']as int,
           id: entry.value['id'],
-          hourcheck: entry.value['hourcheck']);
+          hourcheck: entry.value['hourcheck']as int);
 
           ref.read(taskprovider.notifier).addTask(task);
           print(task);

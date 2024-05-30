@@ -8,6 +8,7 @@ import 'package:task_manager2/providers/task_provider.dart';
 import 'package:task_manager2/taskList.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:task_manager2/tasksScreen.dart';
 
 class NewEntry extends ConsumerStatefulWidget {
   NewEntry({super.key});
@@ -99,37 +100,36 @@ class _NewEntryState extends ConsumerState<NewEntry> {
         }),
       );
 
-      final jsondata = json.decode(response.body);
+      final Map<dynamic, dynamic> data =
+        json.decode(response.body) as Map<dynamic, dynamic>;
+    for (var entry in data.entries) {
+      final Task task = Task(
+          taskname: entry.value['taskname'],
+          description: entry.value['description'],
+          date:DateTime.parse(entry.value['date']),
+          hour: entry.value['hour'],
+          min: entry.value['min'],
+          id: entry.value['id'],
+          hourcheck: entry.value['hourcheck']);
 
-      List<Task> tasks = [];
+          setState(() {
+      ref.read(taskprovider.notifier).addTask(task);
+});
+          print(task);
 
-      for (var item in jsondata) {
-        Task task = Task(
-            taskname: item['taskname'],
-            description: item['description'],
-            date: item['date'],
-            hour: item['hour'],
-            min: item['min'],
-            id: item['id'],
-            hourcheck: item['hourcheck']);
-        tasks.add(task);
-      }
-
-      for (var task in tasks) {
-        ref.read(taskprovider.notifier).addTask(task);
-      } //here the task is getting added to the state list in the provider
-
-      if (mounted) {
-        Navigator.of(context).pop();
-      } else {
-        throw Exception("Failed to retrieve task ID from database.");
-      }
+         
+    }
     } catch (e) {
       print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add task. Please try again.')),
       );
     }
+  
+      Navigator.of(context).pop(
+        MaterialPageRoute(builder: (context) =>  Tasksscreen())
+      );
+
   }
 
   @override
