@@ -31,13 +31,6 @@ String get Formatteddate{
   return formatter.format(date!);
 }
 
-Task.fromJson(Map<String, dynamic> json, {required taskname})
-      : taskname = json['taskname'] ?? '',
-        description = json['description'] ?? '',
-        date = json['date'] == null ? null : DateTime.parse(json['date']),
-        hour = json['hour'] ?? 0,
-        min = json['min'] ?? 0,
-        id=json['name']??'',
-        hourcheck = json['hourcheck'] ?? false;
+
         
 }

@@ -110,15 +110,7 @@ class Taskitem extends StatelessWidget {
                             const SizedBox(
                               width: 2,
                             ),
-                            Text(
-                              task.hourcheck! < 12 ? 'AM' : 'PM',
-                              style: GoogleFonts.lato(
-                                textStyle: const TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 25),
-                              ),
-                            ),
+                            
                           ],
                         ),
                       ],

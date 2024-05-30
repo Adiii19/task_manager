@@ -95,24 +95,29 @@ class _NewEntryState extends ConsumerState<NewEntry> {
           'hour': selectedTime!.hour,
           'min': selectedTime!.minute,
           'hourcheck': selectedTime!.hour,
-          'id':''
+          'id': ''
         }),
       );
 
-      final jsondata=json.decode(response.body);
+      final jsondata = json.decode(response.body);
 
-     List<Task> tasks=[];
+      List<Task> tasks = [];
 
-     for(var item in jsondata){
-
-        Task task= Task(taskname: item['taskname'], description: item['description'], hour: item['hour'], min: item['min'], id: item['id'], hourcheck: item['hourcheck']);
+      for (var item in jsondata) {
+        Task task = Task(
+            taskname: item['taskname'],
+            description: item['description'],
+            date: item['date'],
+            hour: item['hour'],
+            min: item['min'],
+            id: item['id'],
+            hourcheck: item['hourcheck']);
         tasks.add(task);
-     }  
-    
-    for(var task in tasks)
-    {
-      ref.read(taskprovider.notifier).addTask(task);
-    } //here the task is getting added to the state list in the provider
+      }
+
+      for (var task in tasks) {
+        ref.read(taskprovider.notifier).addTask(task);
+      } //here the task is getting added to the state list in the provider
 
       if (mounted) {
         Navigator.of(context).pop();
@@ -129,7 +134,6 @@ class _NewEntryState extends ConsumerState<NewEntry> {
 
   @override
   Widget build(BuildContext context) {
-    final tasknotifier = ref.watch(taskprovider.notifier);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(15.0),

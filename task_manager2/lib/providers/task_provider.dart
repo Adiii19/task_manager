@@ -16,8 +16,14 @@ void delete(String id)
   state=state.where((task)=>task.id!=id).toList();
 }
 
+void loadtasks(List<Task> tasks)
+{
+  state=tasks;
+}
 
 }
+
+
 
 final taskprovider= StateNotifierProvider<Tasknotifier,List<Task>>((ref){
   return Tasknotifier();
