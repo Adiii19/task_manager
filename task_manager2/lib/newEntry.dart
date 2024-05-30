@@ -4,18 +4,19 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:task_manager2/models/model.dart';
+import 'package:task_manager2/providers/task_provider.dart';
 import 'package:task_manager2/taskList.dart';
-import 'package:task_manager2/widgets/taskItem.dart';
-import 'package:intl/intl.dart';
 
-class NewEntry extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class NewEntry extends ConsumerStatefulWidget {
   NewEntry({super.key});
 
   @override
-  State<NewEntry> createState() => _NewEntryState();
+  ConsumerState<NewEntry> createState() => _NewEntryState();
 }
 
-class _NewEntryState extends State<NewEntry> {
+class _NewEntryState extends ConsumerState<NewEntry> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
 
@@ -70,7 +71,7 @@ class _NewEntryState extends State<NewEntry> {
     return;
   }
 
-  final task2 = Task(
+  final task = Task(
     taskname: _taskNameController.text,
     description: _taskDescriptionController.text,
     date: selectedDate!,
@@ -88,29 +89,26 @@ class _NewEntryState extends State<NewEntry> {
       url,
       headers: {'Content-type': 'application/json'},
       body: json.encode({
-        'taskname': task2.taskname,
-        'description': task2.description,
-        'date': task2.date?.toIso8601String(),
-        'hour': task2.hour,
-        'min': task2.min,
-        'hourcheck': task2.hourcheck,
+        'taskname': task.taskname,
+        'description': task.description,
+        'date': task.date?.toIso8601String(),
+        'hour': task.hour,
+        'min': task.min,
+        'hourcheck': task.hourcheck,
+        'id':''
+        
       }),
     );
 
-    final Map<String, dynamic> resData = json.decode(response.body);
-    final newTask = Task(
-      taskname: _taskNameController.text,
-      description: _taskDescriptionController.text,
-      date: selectedDate,
-      hour: selectedTime!.hour,
-      min: selectedTime!.minute,
-      hourcheck: selectedTime!.hour.toInt(),
-      id: resData['name']
-    );
+    final Map<String, dynamic> resData = json.decode(response.body)as Map<String,dynamic>;
 
-    if (mounted) {
-      Navigator.of(context).pop(newTask);
-    }
+    final newtask=Task(taskname: resData['taskname'], description: resData['description'], hour: resData['hour'], min: resData['min'], id: resData['name'], hourcheck: resData['hourcheck']);
+
+    await ref.read(taskprovider.notifier).addTask(newtask); //here the task is getting added to the state list in the provider
+
+    
+      Navigator.of(context).pop();
+    
   } catch (e) {
     print(e);
   }

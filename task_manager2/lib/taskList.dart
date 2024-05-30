@@ -1,23 +1,27 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:task_manager2/providers/task_provider.dart';
 import 'widgets/taskItem.dart';
+import 'package:riverpod/riverpod.dart';
 
-class Tasklist extends StatefulWidget {
+
+class Tasklist extends ConsumerStatefulWidget{
   Tasklist({super.key});
 
   @override
-  State<Tasklist> createState() => _TasklistState();
+ _TasklistState createState() => _TasklistState();
 }
 
-class _TasklistState extends State<Tasklist> {
+class _TasklistState extends ConsumerState<Tasklist> {
   final DatabaseReference databaseref = FirebaseDatabase.instance.ref().child('Tasklist');
   List<Task> loadedItems = [];
   
-  late StreamSubscription _subscription;
+ 
   
   @override
   void initState() {
@@ -25,11 +29,6 @@ class _TasklistState extends State<Tasklist> {
     loadItems();
   }
 
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
 
   Future<void> loadItems() async {
     final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
@@ -48,61 +47,36 @@ class _TasklistState extends State<Tasklist> {
       return;
     }
 
-    Map<String, dynamic>? data;
-    try {
-      data = json.decode(response.body) as Map<String, dynamic>?;
-    } catch (e) {
-      throw Exception('Failed to parse data. Please try again.');
-    }
+             print(response.body);
 
-    if (data == null) {
-      setState(() {
-        loadedItems = [];
-      });
-      return;
-    }
+    
 
-    final List<Task> tasks = data.entries.map((entry) {
-      final taskData = entry.value as Map<String, dynamic>;
-      taskData['id'] = entry.key; // Ensure the ID is included
-      return Task.fromJson(taskData);
-    }).toList();
-
-    setState(() {
-      loadedItems = tasks;
-    });
-
-    _subscription = databaseref.onChildAdded.listen((event) {
-      final dynamic value = event.snapshot.value;
-      if (value != null && value is Map<dynamic, dynamic>) {
-        final newTask = Task.fromJson(Map<String, dynamic>.from(value)..['id'] = event.snapshot.key);
-        setState(() {
-          loadedItems.add(newTask);
-        });
-      }
-    });
-
-    _subscription = databaseref.onChildRemoved.listen((event) {
-      setState(() {
-        loadedItems.removeWhere((task) => task.id == event.snapshot.key);
-      });
-    });
+   
   }
 
   Future<void> removeItem(Task task) async {
     var key = task.id;
     try {
       await databaseref.child(key).remove();
-      setState(() {
-        loadedItems.remove(task);
-      });
-    } catch (error) {
+       
+    }catch (error) {
       print("Failed to remove task: $error");
     }
-  }
+    
+      // setState(() {
+      //   loadedItems.remove(task);
+      // });
+    }
+
+     
+  
 
   @override
   Widget build(BuildContext context) {
+
+    final taskState=ref.watch(taskprovider);
+    final Tasknotifier=ref.watch(taskprovider.notifier);
+
     if (loadedItems.isEmpty) {
       return Center(child: Text("No tasks here. Kindly add your tasks", style: TextStyle(
         color: Colors.grey
@@ -110,9 +84,9 @@ class _TasklistState extends State<Tasklist> {
     }
 
     return ListView.builder(
-      itemCount: loadedItems.length,
+      itemCount: taskState.length,
       itemBuilder: (ctx, index) {
-        final task = loadedItems[index];
+        final task = taskState[index];
         return Dismissible(
           key: ValueKey(task.id),
           direction: DismissDirection.horizontal,
@@ -125,4 +99,5 @@ class _TasklistState extends State<Tasklist> {
       },
     );
   }
+
 }
