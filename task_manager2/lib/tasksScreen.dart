@@ -85,7 +85,9 @@ class _TasksscreenState extends State<Tasksscreen>
         useSafeArea: true,
         isScrollControlled: true,
         backgroundColor: Color.fromARGB(255, 24, 24, 24),
-        builder: (BuildContext context) => NewEntry());
+        builder: (BuildContext context) => NewEntry(
+          
+        ));
   }
 
   @override
@@ -120,7 +122,9 @@ class _TasksscreenState extends State<Tasksscreen>
                 iconSize: 20,
                 color: Colors.white,
                 onPressed: () {
-                  showmodealsheet();
+                  showmodealsheet(
+                    
+                  );
                 },
               )
             ],

@@ -9,7 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_manager2/tasksScreen.dart';
 
 class NewEntry extends ConsumerStatefulWidget {
-  NewEntry({super.key});
+  NewEntry({ this.initialtask,super.key});
+
+ final Task ?initialtask;
 
   @override
   ConsumerState<NewEntry> createState() => _NewEntryState();
@@ -21,6 +23,21 @@ class _NewEntryState extends ConsumerState<NewEntry> {
 
   final _taskNameController = TextEditingController();
   final _taskDescriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(widget.initialtask!=null)
+    {
+       _taskNameController.text = widget.initialtask!.taskname;
+      _taskDescriptionController.text = widget.initialtask!.description;
+      selectedDate = widget.initialtask!.date;
+      selectedTime = TimeOfDay(
+        hour: widget.initialtask!.hour!,
+        minute: widget.initialtask!.min!,);
+    }
+  }
 
   void timePicker() async {
     final now = TimeOfDay.now();
@@ -51,24 +68,27 @@ class _NewEntryState extends ConsumerState<NewEntry> {
       });
     }
   }
-
+ 
+ 
  
 
   Future<void> onaddtask() async {
     final url = Uri.https(
         'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
   
+      final initialTask=widget.initialtask;
+
     try {
       final response = await http.post(
         url,
         headers: {'Content-type': 'application/json'},
         body: json.encode({
-          'taskname': _taskNameController.text,
-          'description': _taskDescriptionController.text,
-          'date': selectedDate!.toIso8601String(),
-          'hour': selectedTime!.hour,
-          'min': selectedTime!.minute,
-          'hourcheck': selectedTime!.hour,
+          'taskname':initialTask?.taskname ?? _taskNameController.text,
+          'description': initialTask?.description ?? _taskDescriptionController.text ,
+          'date': selectedDate ?? initialTask?.date,
+          'hour': selectedTime?.hour ?? initialTask!.hour,
+          'min': selectedTime?.minute ?? initialTask!.min,
+          'hourcheck': selectedTime?.hour ?? initialTask?.hour,
           
            // Firebase will generate the ID
         }),
@@ -83,13 +103,13 @@ class _NewEntryState extends ConsumerState<NewEntry> {
           json.decode(response.body) as Map<dynamic, dynamic>;
 
       Task task = Task(
-          taskname: _taskNameController.text,
-          description: _taskDescriptionController.text,
-          date: selectedDate!,
-          hour: selectedTime!.hour,
-          min: selectedTime!.minute,
+          taskname: initialTask?.taskname ?? _taskNameController.text,
+          description: initialTask?.description ?? _taskDescriptionController.text ,
+          date: selectedDate ?? initialTask!.date,
+          hour: selectedTime?.hour ?? initialTask!.hour,
+          min: selectedTime?.minute ?? initialTask!.min,
           id: data['name'],
-          hourcheck: selectedTime!.hour);
+          hourcheck: selectedTime?.hour ?? initialTask?.hour,);
 
       // Extract the generated ID from the response
       final String id = data[
@@ -98,6 +118,12 @@ class _NewEntryState extends ConsumerState<NewEntry> {
       task.id = id; // Update the task object with the generated ID
 
       // Add the task to the provider state
+      if(initialTask!=null)
+      {
+        setState(() {
+  ref.read(taskprovider.notifier).edittask(initialTask);
+});
+      }
       setState(() {
         ref.read(taskprovider.notifier).addTask(task);
       });

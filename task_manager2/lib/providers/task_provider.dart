@@ -21,6 +21,19 @@ void loadtasks(List<Task> tasks)
   state=tasks;
 }
 
+void edittask(Task task){
+
+final index=state.indexWhere((existingtask)=>existingtask.id==task.id);
+if(index!=-1)
+{
+  state[index]=task;
+}
+else{
+  print('Error:Task with ID ${task.id} not found for editing');
+}
+
+}
+
 }
 
 

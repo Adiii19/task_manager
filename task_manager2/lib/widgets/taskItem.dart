@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:task_manager2/providers/task_provider.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:task_manager2/newEntry.dart';
 
 class Taskitem extends ConsumerStatefulWidget {
   Taskitem(this.task, {super.key});
@@ -35,6 +36,8 @@ class _TaskitemState extends ConsumerState<Taskitem> {
       ref.read(taskprovider.notifier).delete(key);
     });
 
+
+  
     
   }
 
@@ -45,18 +48,25 @@ class _TaskitemState extends ConsumerState<Taskitem> {
       padding: const EdgeInsets.all(20.0),
       child: InkWell(
         // onDoubleTap: () => onremove,
-        onTap: () {
-          // edittask(
-          //     Task(
-          //         taskname: widget.task.taskname,
-          //         description: widget.task.description,
-          //         date: widget.task.date,
-          //         hour: widget.task.hour,
-          //         min: widget.task.min,
-          //        rang: widget.task.rang,
-          //         hourcheck: widget.task.hourcheck),
-          //     0);
-        },
+        onTap: (){
+      final task= widget.task;
+   
+   showModalBottomSheet(
+        sheetAnimationStyle: AnimationStyle(
+            curve: Curves.bounceInOut, duration: Durations.long2),
+        context: context,
+        useSafeArea: true,
+        isScrollControlled: true,
+        backgroundColor: Color.fromARGB(255, 24, 24, 24),
+        builder: (BuildContext context) => NewEntry(
+            initialtask: task,
+        ));
+        
+     
+   
+        }
+         
+        ,
         splashColor: Colors.pink.shade200,
 
         focusColor: Colors.white,
@@ -71,9 +81,8 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       
-                        Padding(
-                          padding: const EdgeInsets.only(left: 130),
-                          child: Center(
+                        
+                           Center(
                             child: Text(
                               widget.task.taskname,
                               style: GoogleFonts.lato(
@@ -84,37 +93,12 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                               ),
                             ),
                           ),
-                        ),
+                        
                       
                       SizedBox(
                         width: 1,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 75),
-                        child: IconButton(
-                            onPressed: () {
-                             removeItem(widget.task);
-                            },
-                            icon: Container(
-                              
-                              decoration: BoxDecoration(
-                                
-                                border: Border.all(
-                                  style: BorderStyle.solid,
-                                  color: Colors.red,
-                                  
-                                ),
-                                borderRadius: BorderRadius.all(Radius.circular(15))
-                  
-                              ),
-                              child: Icon(
-                                Icons.delete_outline_outlined,
-                                color: Colors.white,
-                                size: 30,
-                                
-                              ),
-                            )),
-                      )
+                      
                     ],
                   ),
                   Text(
@@ -132,14 +116,14 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                   Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: Colors.transparent),
+                        color: Colors.white38),
                     child: Column(
                       children: [
                         Center(
                           child: Text('Deadline:',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
-                                    color: Colors.pink,
+                                    color: Color.fromARGB(255, 178, 36, 26),
                                     fontWeight: FontWeight.w700,
                                     fontSize: 25),
                               )),
@@ -157,8 +141,36 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                           width: 5,
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          
                           children: [
+                            Padding(
+                        padding: const EdgeInsets.only(left: 10,right: 45),
+                        child: IconButton(
+                            onPressed: () {
+                             removeItem(widget.task);
+                            },
+                            icon: Container(
+                              
+                              decoration: BoxDecoration(
+                                
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  color: Colors.black,
+                                  width: 2
+                                  
+                                ),
+                                borderRadius: BorderRadius.all(Radius.circular(15))
+                                      
+                              ),
+                              child: Icon(
+                                Icons.delete_outline_outlined,
+                                color: const Color.fromARGB(255, 208, 16, 16),
+                                size: 30,
+                                
+                                
+                              ),
+                            )),
+                      ),
                             Text(
                               '${widget.task.hour.toString()}:${widget.task.min.toString()}',
                               style: GoogleFonts.lato(
@@ -171,6 +183,15 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                             const SizedBox(
                               width: 2,
                             ),
+                           Text(
+                              '${widget.task.hour! < 12 ?'AM':'PM'}',
+                              style: GoogleFonts.lato(
+                                textStyle: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 25),
+                              ),)
+
                           ],
                         ),
                       ],
