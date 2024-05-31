@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:task_manager2/authScreen.dart';
 import 'package:task_manager2/models/model.dart';
-import 'package:task_manager2/newEntry.dart';
 import 'package:task_manager2/providers/task_provider.dart';
-import 'package:task_manager2/tasksScreen.dart';
-import 'package:task_manager2/taskList.dart';
-import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 
 class Taskitem extends ConsumerStatefulWidget {
@@ -20,7 +15,7 @@ class Taskitem extends ConsumerStatefulWidget {
 }
 
 class _TaskitemState extends ConsumerState<Taskitem> {
-  //final Function(Task) onremove;
+  
   late AnimationController controller;
 
   late Animation<Offset> offsetAnimation;
@@ -28,7 +23,7 @@ class _TaskitemState extends ConsumerState<Taskitem> {
   final DatabaseReference databaseref =
       FirebaseDatabase.instance.ref().child('Tasklist');
 
-  Future<void> removeItem(task) async {
+  Future<void> removeItem(Task task) async {
     var key = task.id;
     try {
       await databaseref.child(key).remove();
@@ -40,9 +35,7 @@ class _TaskitemState extends ConsumerState<Taskitem> {
       ref.read(taskprovider.notifier).delete(key);
     });
 
-    // setState(() {
-    //   loadedItems.remove(task);
-    // });
+    
   }
 
   @override
@@ -77,28 +70,51 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Center(
-                        child: Text(
-                          widget.task.taskname,
-                          style: GoogleFonts.lato(
-                            textStyle: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 20),
+                      
+                        Padding(
+                          padding: const EdgeInsets.only(left: 130),
+                          child: Center(
+                            child: Text(
+                              widget.task.taskname,
+                              style: GoogleFonts.lato(
+                                textStyle: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 20),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      
                       SizedBox(
-                        width: 40,
+                        width: 1,
                       ),
-                      IconButton(
-                          onPressed: () {
-                            removeItem(widget.task);
-                          },
-                          icon: Icon(
-                            Icons.delete_rounded,
-                            color: Colors.red,
-                          ))
+                      Padding(
+                        padding: const EdgeInsets.only(left: 75),
+                        child: IconButton(
+                            onPressed: () {
+                             removeItem(widget.task);
+                            },
+                            icon: Container(
+                              
+                              decoration: BoxDecoration(
+                                
+                                border: Border.all(
+                                  style: BorderStyle.solid,
+                                  color: Colors.red,
+                                  
+                                ),
+                                borderRadius: BorderRadius.all(Radius.circular(15))
+                  
+                              ),
+                              child: Icon(
+                                Icons.delete_outline_outlined,
+                                color: Colors.white,
+                                size: 30,
+                                
+                              ),
+                            )),
+                      )
                     ],
                   ),
                   Text(

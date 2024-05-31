@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:task_manager2/models/model.dart';
 import 'package:task_manager2/providers/task_provider.dart';
-import 'package:task_manager2/taskList.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_manager2/tasksScreen.dart';
@@ -23,7 +21,6 @@ class _NewEntryState extends ConsumerState<NewEntry> {
 
   final _taskNameController = TextEditingController();
   final _taskDescriptionController = TextEditingController();
-  //final Task task=Task(taskname: '', description: '', hour: 0, min: 0, id:'', hourcheck: 0);
 
   void timePicker() async {
     final now = TimeOfDay.now();
@@ -55,19 +52,12 @@ class _NewEntryState extends ConsumerState<NewEntry> {
     }
   }
 
-  // void changeColor(Color color) {
-  //   setState(() {
-  //     pickerColor = color;
-  //   });
-  // }
+ 
 
   Future<void> onaddtask() async {
     final url = Uri.https(
         'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
   
-    
-
-
     try {
       final response = await http.post(
         url,
@@ -79,7 +69,8 @@ class _NewEntryState extends ConsumerState<NewEntry> {
           'hour': selectedTime!.hour,
           'min': selectedTime!.minute,
           'hourcheck': selectedTime!.hour,
-          'id': '', // Firebase will generate the ID
+          
+           // Firebase will generate the ID
         }),
       );
 

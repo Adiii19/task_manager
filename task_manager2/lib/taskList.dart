@@ -22,11 +22,7 @@ class _TasklistState extends ConsumerState<Tasklist> {
  
   List<Task> loadedItems=[];
 
-  @override
-  void initState() {
-    super.initState();
-    loadItems();
-  }
+  
 
   Future<void> loadItems() async {
     final url = Uri.https(
@@ -50,30 +46,36 @@ class _TasklistState extends ConsumerState<Tasklist> {
         json.decode(response.body) as Map<dynamic, dynamic>;
     for (var entry in data.entries) {
     
-      
       final Task task = Task(
           taskname: entry.value['taskname'],
           description: entry.value['description'],
           date:DateTime.parse(entry.value['date']),
-          hour: entry.value['hour'] as int,
+          hour: entry.value['hour']as int ,
           min: entry.value['min']as int,
-          id: entry.value['id'],
+          id: entry.key,
+          
           hourcheck: entry.value['hourcheck']as int);
 
-          setState(() {
                 ref.read(taskprovider.notifier).addTask(task);
-          });
+         
           print(task);
     }
   }
 
-  
+  @override
+  void initState() {
+    super.initState();
+    loadItems();
+  }
 
   @override
   Widget build(
     BuildContext context,
   ) {
     final taskState = ref.watch(taskprovider);
+    setState(() {
+      
+    });
 
 
     if (taskState.isEmpty) {
@@ -86,12 +88,14 @@ class _TasklistState extends ConsumerState<Tasklist> {
 
     return ListView.builder(
       itemCount: taskState.length,
-      itemBuilder: (ctx, index) {
+      itemBuilder: (ctx, index)
+       {
+
         final task = taskState[index];
-        
+        return
            Taskitem(task);
-          
-      },
+
+        },
     );
   }
 }
