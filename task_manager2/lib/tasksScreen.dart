@@ -90,6 +90,11 @@ class _TasksscreenState extends State<Tasksscreen>
 
   @override
   Widget build(BuildContext context) {
+
+    setState(() {
+      Tasklist;
+    });
+
     // TODO: implement build
     return Scaffold(
       backgroundColor: Colors.black,

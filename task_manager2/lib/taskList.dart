@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -18,8 +19,7 @@ class Tasklist extends ConsumerStatefulWidget {
 }
 
 class _TasklistState extends ConsumerState<Tasklist> {
-  final DatabaseReference databaseref =
-      FirebaseDatabase.instance.ref().child('Tasklist');
+ 
   List<Task> loadedItems=[];
 
   @override
@@ -49,6 +49,8 @@ class _TasklistState extends ConsumerState<Tasklist> {
     final Map<dynamic, dynamic> data =
         json.decode(response.body) as Map<dynamic, dynamic>;
     for (var entry in data.entries) {
+    
+      
       final Task task = Task(
           taskname: entry.value['taskname'],
           description: entry.value['description'],
@@ -58,23 +60,14 @@ class _TasklistState extends ConsumerState<Tasklist> {
           id: entry.value['id'],
           hourcheck: entry.value['hourcheck']as int);
 
-          ref.read(taskprovider.notifier).addTask(task);
+          setState(() {
+                ref.read(taskprovider.notifier).addTask(task);
+          });
           print(task);
     }
   }
 
-  Future<void> removeItem(Task task) async {
-    var key = task.id;
-    try {
-      await databaseref.child(key).remove();
-    } catch (error) {
-      print("Failed to remove task: $error");
-    }
-
-    // setState(() {
-    //   loadedItems.remove(task);
-    // });
-  }
+  
 
   @override
   Widget build(
@@ -95,15 +88,9 @@ class _TasklistState extends ConsumerState<Tasklist> {
       itemCount: taskState.length,
       itemBuilder: (ctx, index) {
         final task = taskState[index];
-        return Dismissible(
-          key: ValueKey(task.id),
-          direction: DismissDirection.horizontal,
-          onDismissed: (direction) {
-            removeItem(task);
-          },
-          child: Taskitem(task),
-          background: Container(color: Colors.red),
-        );
+        
+           Taskitem(task);
+          
       },
     );
   }

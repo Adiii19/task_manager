@@ -1,30 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:task_manager2/authScreen.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:task_manager2/newEntry.dart';
+import 'package:task_manager2/providers/task_provider.dart';
 import 'package:task_manager2/tasksScreen.dart';
 import 'package:task_manager2/taskList.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
+import 'package:firebase_database/firebase_database.dart';
 
-class Taskitem extends StatelessWidget {
-  Taskitem(this.task,{super.key});
+class Taskitem extends ConsumerStatefulWidget {
+  Taskitem(this.task, {super.key});
 
   late final Task task;
-   //final Function(Task) onremove;
 
+  @override
+  ConsumerState<Taskitem> createState() => _TaskitemState();
+}
+
+class _TaskitemState extends ConsumerState<Taskitem> {
+  //final Function(Task) onremove;
   late AnimationController controller;
 
   late Animation<Offset> offsetAnimation;
 
-  // void edittask(Task task, int index) {
+  final DatabaseReference databaseref =
+      FirebaseDatabase.instance.ref().child('Tasklist');
+
+  Future<void> removeItem(task) async {
+    var key = task.id;
+    try {
+      await databaseref.child(key).remove();
+    } catch (error) {
+      print("Failed to remove task: $error");
+    }
+
+    setState(() {
+      ref.read(taskprovider.notifier).delete(key);
+    });
+
+    // setState(() {
+    //   loadedItems.remove(task);
+    // });
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: InkWell(
-       // onDoubleTap: () => onremove,
+        // onDoubleTap: () => onremove,
         onTap: () {
           // edittask(
           //     Task(
@@ -41,23 +68,41 @@ class Taskitem extends StatelessWidget {
 
         focusColor: Colors.white,
         borderRadius: BorderRadius.all(Radius.circular(15)),
-        
+
         child: Container(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  Text(
-                    task.taskname,
-                    style: GoogleFonts.lato(
-                      textStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 20),
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Center(
+                        child: Text(
+                          widget.task.taskname,
+                          style: GoogleFonts.lato(
+                            textStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 40,
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            removeItem(widget.task);
+                          },
+                          icon: Icon(
+                            Icons.delete_rounded,
+                            color: Colors.red,
+                          ))
+                    ],
                   ),
                   Text(
-                    task.description,
+                    widget.task.description,
                     style: GoogleFonts.lato(
                       textStyle: const TextStyle(
                           color: Colors.white,
@@ -84,7 +129,7 @@ class Taskitem extends StatelessWidget {
                               )),
                         ),
                         Text(
-                          task.Formatteddate.toString(),
+                          widget.task.Formatteddate.toString(),
                           style: GoogleFonts.lato(
                             textStyle: const TextStyle(
                                 color: Colors.black,
@@ -99,7 +144,7 @@ class Taskitem extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '${task.hour.toString()}:${task.min.toString()}',
+                              '${widget.task.hour.toString()}:${widget.task.min.toString()}',
                               style: GoogleFonts.lato(
                                 textStyle: const TextStyle(
                                     color: Colors.black,
@@ -110,7 +155,6 @@ class Taskitem extends StatelessWidget {
                             const SizedBox(
                               width: 2,
                             ),
-                            
                           ],
                         ),
                       ],

@@ -62,28 +62,11 @@ class _NewEntryState extends ConsumerState<NewEntry> {
   // }
 
   Future<void> onaddtask() async {
-    if (_taskNameController.text.isEmpty ||
-        _taskDescriptionController.text.isEmpty ||
-        selectedDate == null ||
-        selectedTime == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields')),
-      );
-      return;
-    }
-
-    final task = Task(
-        taskname: _taskNameController.text,
-        description: _taskDescriptionController.text,
-        date: selectedDate!,
-        hour: selectedTime!.hour,
-        min: selectedTime!.minute,
-        hourcheck: selectedTime!.hour,
-        id: '' // This will be set after the task is created in the database
-        );
-
     final url = Uri.https(
         'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
+  
+    
+
 
     try {
       final response = await http.post(
@@ -96,40 +79,49 @@ class _NewEntryState extends ConsumerState<NewEntry> {
           'hour': selectedTime!.hour,
           'min': selectedTime!.minute,
           'hourcheck': selectedTime!.hour,
-          'id': ''
+          'id': '', // Firebase will generate the ID
         }),
       );
 
+      if (response.statusCode >= 400) {
+        print('Failed to add task. Please try again.');
+        return;
+      }
+
       final Map<dynamic, dynamic> data =
-        json.decode(response.body) as Map<dynamic, dynamic>;
-    for (var entry in data.entries) {
-      final Task task = Task(
-          taskname: entry.value['taskname'],
-          description: entry.value['description'],
-          date:DateTime.parse(entry.value['date']),
-          hour: entry.value['hour'],
-          min: entry.value['min'],
-          id: entry.value['id'],
-          hourcheck: entry.value['hourcheck']);
+          json.decode(response.body) as Map<dynamic, dynamic>;
 
-          setState(() {
-      ref.read(taskprovider.notifier).addTask(task);
-});
-          print(task);
+      Task task = Task(
+          taskname: _taskNameController.text,
+          description: _taskDescriptionController.text,
+          date: selectedDate!,
+          hour: selectedTime!.hour,
+          min: selectedTime!.minute,
+          id: data['name'],
+          hourcheck: selectedTime!.hour);
 
-         
+      // Extract the generated ID from the response
+      final String id = data[
+          'name']; // Assuming Firebase returns the ID in a field named 'name'
+
+      task.id = id; // Update the task object with the generated ID
+
+      // Add the task to the provider state
+      setState(() {
+        ref.read(taskprovider.notifier).addTask(task);
+      });
+      print('Task added successfully!');
+    } catch (error) {
+      print('Error adding task: $error');
     }
-    } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add task. Please try again.')),
-      );
-    }
-  
-      Navigator.of(context).pop(
-        MaterialPageRoute(builder: (context) =>  Tasksscreen())
-      );
 
+    setState(() {
+      _taskNameController.clear();
+      _taskDescriptionController.clear();
+      Tasksscreen();
+    });
+
+    Navigator.of(context).pop(Tasksscreen());
   }
 
   @override
