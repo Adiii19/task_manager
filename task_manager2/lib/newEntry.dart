@@ -2,16 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:task_manager2/models/model.dart';
 import 'package:task_manager2/providers/task_provider.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_manager2/tasksScreen.dart';
 
 class NewEntry extends ConsumerStatefulWidget {
-  NewEntry({this.initialtask, super.key});
-
   final Task? initialtask;
+
+  NewEntry({this.initialtask, super.key});
 
   @override
   ConsumerState<NewEntry> createState() => _NewEntryState();
@@ -26,7 +26,6 @@ class _NewEntryState extends ConsumerState<NewEntry> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.initialtask != null) {
       _taskNameController.text = widget.initialtask!.taskname;
@@ -73,15 +72,28 @@ class _NewEntryState extends ConsumerState<NewEntry> {
     final initialTask = widget.initialtask;
     final taskname = _taskNameController.text;
     final taskdescription = _taskDescriptionController.text;
-    final taskdate = selectedDate;
-    final hour = selectedTime!.hour ?? initialTask!.hour;
-    final min = selectedTime!.minute ?? initialTask!.min;
+    final taskdate = selectedDate ?? initialTask?.date;
+    final hour = selectedTime?.hour ?? initialTask?.hour;
+    final min = selectedTime?.minute ?? initialTask?.min;
 
-    if (widget.initialtask != null) {
-      final url = Uri.http('task-manager-app-67b0c-default-rtdb.firebaseio.com',
-          '/Tasklist.json');
-      
-       final response = await http.patch(
+    if (taskname.isEmpty || taskdescription.isEmpty || taskdate == null || hour == null || min == null) {
+      print('Please fill in all fields.');
+      return;
+    }
+
+    final newTask = Task(
+      taskname: taskname,
+      description: taskdescription,
+      date: taskdate,
+      hour: hour,
+      min: min,
+      id: initialTask?.id ?? '', // For new tasks, the ID will be updated later
+      hourcheck: hour,
+    );
+
+    if (initialTask != null) {
+      final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist/${initialTask.id}.json');
+      final response = await http.patch(
         url,
         headers: {'Content-type': 'application/json'},
         body: json.encode({
@@ -90,7 +102,8 @@ class _NewEntryState extends ConsumerState<NewEntry> {
             'date': taskdate!.toIso8601String(),
             'hour': hour,
             'min': min,
-            'hourcheck': hour
+            'hourcheck': hour,
+            'id': initialTask?.id ?? ''
         }),
       );
 
@@ -99,33 +112,13 @@ class _NewEntryState extends ConsumerState<NewEntry> {
         return;
       }
 
-      final updatedTask = Task(
-        taskname: taskname,
-        description: taskdescription,
-        date: taskdate!,
-        hour: hour!,
-        min: min!,
-        id: initialTask!.id,
-        hourcheck: hour,
-      );
-
-      ref.read(taskprovider.notifier).edittask(updatedTask);
-    
-      Navigator.of(context).pop();
-    }
-
-    else{
-
-    final url = Uri.https(
-        'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
-
-   
-
-    try {
+      ref.read(taskprovider.notifier).edittask(newTask);
+    } else {
+      final url = Uri.https('task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
       final response = await http.post(
         url,
         headers: {'Content-type': 'application/json'},
-        body: json.encode({
+         body: json.encode({
           'taskname': initialTask?.taskname ?? _taskNameController.text,
           'description':
               initialTask?.description ?? _taskDescriptionController.text,
@@ -143,49 +136,16 @@ class _NewEntryState extends ConsumerState<NewEntry> {
         return;
       }
 
-      final Map<dynamic, dynamic> data =
-          json.decode(response.body) as Map<dynamic, dynamic>;
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final String id = data['name'];
 
-      Task task = Task(
-        taskname: initialTask?.taskname ?? _taskNameController.text,
-        description:
-            initialTask?.description ?? _taskDescriptionController.text,
-        date: selectedDate ?? initialTask!.date,
-        hour: selectedTime?.hour ?? initialTask!.hour,
-        min: selectedTime?.minute ?? initialTask!.min,
-        id: data['name'],
-        hourcheck: selectedTime?.hour ?? initialTask?.hour,
-      );
-
-      // Extract the generated ID from the response
-      final String id = data[
-          'name']; // Assuming Firebase returns the ID in a field named 'name'
-
-      task.id = id; // Update the task object with the generated ID
-
-      // Add the task to the provider state
-      if (initialTask != null) {
-        setState(() {
-          ref.read(taskprovider.notifier).edittask(initialTask);
-        });
-      }
-      setState(() {
-        ref.read(taskprovider.notifier).addTask(task);
-      });
-      print('Task added successfully!');
-    } catch (error) {
-      print('Error adding task: $error');
+      newTask.id = id; // Update the task with the generated ID
+      ref.read(taskprovider.notifier).addTask(newTask);
     }
 
-    setState(() {
-      _taskNameController.clear();
-      _taskDescriptionController.clear();
-      Tasksscreen();
-    });
-
+    _taskNameController.clear();
+    _taskDescriptionController.clear();
     Navigator.of(context).pop(Tasksscreen());
-  }
-  
   }
 
   @override
@@ -200,9 +160,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
               padding: const EdgeInsets.all(15.0),
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color.fromARGB(255, 224, 113, 105),
-                  ),
+                  border: Border.all(color: const Color.fromARGB(255, 224, 113, 105)),
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 child: TextField(
@@ -212,9 +170,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
                     border: OutlineInputBorder(),
                     label: Text(
                       "Task Name",
-                      style: GoogleFonts.lato(
-                        textStyle: TextStyle(color: Colors.white),
-                      ),
+                      style: GoogleFonts.lato(textStyle: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ),
@@ -225,25 +181,19 @@ class _NewEntryState extends ConsumerState<NewEntry> {
               padding: const EdgeInsets.all(15.0),
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    style: BorderStyle.solid,
-                    color: Color.fromARGB(255, 193, 128, 124),
-                  ),
+                  border: Border.all(color: Color.fromARGB(255, 193, 128, 124)),
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 child: TextField(
                   controller: _taskDescriptionController,
                   maxLines: 6,
                   minLines: 1,
-                  focusNode: FocusNode(),
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     label: Text(
                       "Task Description",
-                      style: GoogleFonts.lato(
-                        textStyle: TextStyle(color: Colors.white),
-                      ),
+                      style: GoogleFonts.lato(textStyle: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ),
@@ -254,10 +204,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    style: BorderStyle.solid,
-                    color: Colors.pink.shade200,
-                  ),
+                  border: Border.all(color: Colors.pink.shade200),
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 child: Padding(
@@ -266,38 +213,27 @@ class _NewEntryState extends ConsumerState<NewEntry> {
                     children: [
                       Text(
                         "Deadline:",
-                        style:
-                            GoogleFonts.lato(color: Colors.red, fontSize: 18),
+                        style: GoogleFonts.lato(color: Colors.red, fontSize: 18),
                       ),
                       SizedBox(width: 5),
                       Row(
                         children: [
                           IconButton(
                             onPressed: presentDatePicker,
-                            icon: Icon(
-                              Icons.calendar_month_outlined,
-                              color: Colors.blueAccent,
-                            ),
+                            icon: Icon(Icons.calendar_month_outlined, color: Colors.blueAccent),
                           ),
                           SizedBox(width: 5),
                           Text(
-                            selectedDate == null
-                                ? 'Select Date'
-                                : formatter.format(selectedDate!),
+                            selectedDate == null ? 'Select Date' : DateFormat.yMd().format(selectedDate!),
                             style: TextStyle(color: Colors.white),
                           ),
                           SizedBox(width: 10),
                           IconButton(
                             onPressed: timePicker,
-                            icon: Icon(
-                              Icons.watch_later_outlined,
-                              color: Colors.blueAccent,
-                            ),
+                            icon: Icon(Icons.watch_later_outlined, color: Colors.blueAccent),
                           ),
                           Text(
-                            selectedTime == null
-                                ? 'Select Time'
-                                : '${selectedTime!.hour}:${selectedTime!.minute}',
+                            selectedTime == null ? 'Select Time' : '${selectedTime!.hour}:${selectedTime!.minute}',
                             style: TextStyle(color: Colors.white),
                           ),
                         ],
@@ -308,70 +244,8 @@ class _NewEntryState extends ConsumerState<NewEntry> {
               ),
             ),
             SizedBox(height: 20),
-            // Padding(
-            //   padding: const EdgeInsets.only(
-            //       bottom: 15, top: 15, left: 100, right: 90),
-            //   child: Container(
-            //     decoration: BoxDecoration(
-            //       border: Border.all(
-            //         style: BorderStyle.solid,
-            //         color: const Color.fromARGB(255, 224, 113, 105),
-            //       ),
-            //       borderRadius: BorderRadius.all(Radius.circular(8)),
-            //     ),
-            //     child: Center(
-            //       child: Row(
-            //         children: [
-            //           Padding(
-            //             padding: const EdgeInsets.all(10.0),
-            //             child: Text(
-            //               "Pick a Color:",
-            //               style: GoogleFonts.lato(
-            //                 textStyle: TextStyle(color: Colors.white),
-            //               ),
-            //             ),
-            //           ),
-            //           const Spacer(),
-            //           IconButton(
-            //             onPressed: () {
-            //               showDialog(
-            //                 context: context,
-            //                 builder: (context) {
-            //                   return AlertDialog(
-            //                     title: Text('Pick a color!'),
-            //                     content: SingleChildScrollView(
-            //                       child: ColorPicker(
-            //                         pickerColor: pickerColor,
-            //                         onColorChanged: changeColor,
-            //                       ),
-            //                     ),
-            //                     actions: <Widget>[
-            //                       ElevatedButton(
-            //                         child: Text('Got it'),
-            //                         onPressed: () {
-            //                           setState(
-            //                               () => currentColor = pickerColor);
-            //                           Navigator.of(context).pop();
-            //                         },
-            //                       ),
-            //                     ],
-            //                   );
-            //                 },
-            //               );
-            //             },
-            //             icon: const Icon(Icons.color_lens_outlined),
-            //             color: currentColor,
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            SizedBox(height: 20),
             TextButton(
-              onPressed: () {
-                onaddtask();
-              },
+              onPressed: onaddtask,
               child: Container(
                 width: 300,
                 decoration: BoxDecoration(
@@ -386,7 +260,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
                 padding: EdgeInsets.symmetric(vertical: 12),
                 alignment: Alignment.center,
                 child: Text(
-                  "Add Task",
+                  widget.initialtask == null ? "Add Task" : "Update Task",
                   style: GoogleFonts.lato(
                     textStyle: TextStyle(
                       color: Colors.white,
