@@ -9,9 +9,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:task_manager2/tasksScreen.dart';
 
 class NewEntry extends ConsumerStatefulWidget {
-  NewEntry({ this.initialtask,super.key});
+  NewEntry({this.initialtask, super.key});
 
- final Task ?initialtask;
+  final Task? initialtask;
 
   @override
   ConsumerState<NewEntry> createState() => _NewEntryState();
@@ -28,14 +28,14 @@ class _NewEntryState extends ConsumerState<NewEntry> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(widget.initialtask!=null)
-    {
-       _taskNameController.text = widget.initialtask!.taskname;
+    if (widget.initialtask != null) {
+      _taskNameController.text = widget.initialtask!.taskname;
       _taskDescriptionController.text = widget.initialtask!.description;
       selectedDate = widget.initialtask!.date;
       selectedTime = TimeOfDay(
         hour: widget.initialtask!.hour!,
-        minute: widget.initialtask!.min!,);
+        minute: widget.initialtask!.min!,
+      );
     }
   }
 
@@ -68,29 +68,73 @@ class _NewEntryState extends ConsumerState<NewEntry> {
       });
     }
   }
- 
- 
- 
 
   Future<void> onaddtask() async {
+    final initialTask = widget.initialtask;
+    final taskname = _taskNameController.text;
+    final taskdescription = _taskDescriptionController.text;
+    final taskdate = selectedDate;
+    final hour = selectedTime!.hour ?? initialTask!.hour;
+    final min = selectedTime!.minute ?? initialTask!.min;
+
+    if (widget.initialtask != null) {
+      final url = Uri.http('task-manager-app-67b0c-default-rtdb.firebaseio.com',
+          '/Tasklist.json');
+      
+       final response = await http.patch(
+        url,
+        headers: {'Content-type': 'application/json'},
+        body: json.encode({
+          'taskname': taskname,
+            'description': taskdescription,
+            'date': taskdate!.toIso8601String(),
+            'hour': hour,
+            'min': min,
+            'hourcheck': hour
+        }),
+      );
+
+      if (response.statusCode >= 400) {
+        print('Failed to update task. Please try again.');
+        return;
+      }
+
+      final updatedTask = Task(
+        taskname: taskname,
+        description: taskdescription,
+        date: taskdate!,
+        hour: hour!,
+        min: min!,
+        id: initialTask!.id,
+        hourcheck: hour,
+      );
+
+      ref.read(taskprovider.notifier).edittask(updatedTask);
+    
+      Navigator.of(context).pop();
+    }
+
+    else{
+
     final url = Uri.https(
         'task-manager-app-67b0c-default-rtdb.firebaseio.com', '/Tasklist.json');
-  
-      final initialTask=widget.initialtask;
+
+   
 
     try {
       final response = await http.post(
         url,
         headers: {'Content-type': 'application/json'},
         body: json.encode({
-          'taskname':initialTask?.taskname ?? _taskNameController.text,
-          'description': initialTask?.description ?? _taskDescriptionController.text ,
+          'taskname': initialTask?.taskname ?? _taskNameController.text,
+          'description':
+              initialTask?.description ?? _taskDescriptionController.text,
           'date': selectedDate ?? initialTask?.date,
           'hour': selectedTime?.hour ?? initialTask!.hour,
           'min': selectedTime?.minute ?? initialTask!.min,
           'hourcheck': selectedTime?.hour ?? initialTask?.hour,
-          
-           // Firebase will generate the ID
+
+          // Firebase will generate the ID
         }),
       );
 
@@ -103,13 +147,15 @@ class _NewEntryState extends ConsumerState<NewEntry> {
           json.decode(response.body) as Map<dynamic, dynamic>;
 
       Task task = Task(
-          taskname: initialTask?.taskname ?? _taskNameController.text,
-          description: initialTask?.description ?? _taskDescriptionController.text ,
-          date: selectedDate ?? initialTask!.date,
-          hour: selectedTime?.hour ?? initialTask!.hour,
-          min: selectedTime?.minute ?? initialTask!.min,
-          id: data['name'],
-          hourcheck: selectedTime?.hour ?? initialTask?.hour,);
+        taskname: initialTask?.taskname ?? _taskNameController.text,
+        description:
+            initialTask?.description ?? _taskDescriptionController.text,
+        date: selectedDate ?? initialTask!.date,
+        hour: selectedTime?.hour ?? initialTask!.hour,
+        min: selectedTime?.minute ?? initialTask!.min,
+        id: data['name'],
+        hourcheck: selectedTime?.hour ?? initialTask?.hour,
+      );
 
       // Extract the generated ID from the response
       final String id = data[
@@ -118,11 +164,10 @@ class _NewEntryState extends ConsumerState<NewEntry> {
       task.id = id; // Update the task object with the generated ID
 
       // Add the task to the provider state
-      if(initialTask!=null)
-      {
+      if (initialTask != null) {
         setState(() {
-  ref.read(taskprovider.notifier).edittask(initialTask);
-});
+          ref.read(taskprovider.notifier).edittask(initialTask);
+        });
       }
       setState(() {
         ref.read(taskprovider.notifier).addTask(task);
@@ -139,6 +184,8 @@ class _NewEntryState extends ConsumerState<NewEntry> {
     });
 
     Navigator.of(context).pop(Tasksscreen());
+  }
+  
   }
 
   @override
