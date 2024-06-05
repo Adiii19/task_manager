@@ -32,18 +32,7 @@ class _TasksscreenState extends State<Tasksscreen>
         hourcheck: 11);
   
 
-  // void removetask(Task task) {
-  //   setState(() {
-  //     registeredtasks.remove(task);
-  //   });
-  // }
-
-  // void addtask(Task task) {
-  //   setState(() {
-  //     registeredtasks.add(task);
-  //   });
-  // }
-
+  
   @override
   void initState() {
     // TODO: implement initState
@@ -80,13 +69,14 @@ class _TasksscreenState extends State<Tasksscreen>
   void showmodealsheet() {
     showModalBottomSheet(
         sheetAnimationStyle: AnimationStyle(
-            curve: Curves.bounceInOut, duration: Durations.long2),
+            curve: Curves.bounceInOut, duration: Durations.long4),
         context: context,
         useSafeArea: true,
-        isScrollControlled: true,
-        backgroundColor: Color.fromARGB(255, 24, 24, 24),
+        constraints: BoxConstraints.expand(),
+         isScrollControlled: true,
+        elevation: 10,
+        backgroundColor: Color.fromARGB(240, 15, 14, 14),
         builder: (BuildContext context) => NewEntry(
-          
         ));
   }
 
@@ -105,55 +95,108 @@ class _TasksscreenState extends State<Tasksscreen>
           SizedBox(
             height: 50,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(width: 40),
-              Text(
-                "Task Manager",
-                style: GoogleFonts.lato(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white),
+          Container(
+            height: 220,
+            width: 375,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Color.fromARGB(11, 204, 200, 200)
               ),
-              Spacer(),
-              IconButton(
-                icon: Icon(Icons.add),
-                iconSize: 20,
-                color: Colors.white,
-                onPressed: () {
-                  showmodealsheet(
-                    
-                  );
-                },
-              )
-            ],
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 100),
-            child: FadeTransition(
-              opacity: _animation,
-              child: Text(
-                "Hi Aditya!",
-                style: GoogleFonts.lato(
-                    fontSize: 50,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white),
-              ),
+              borderRadius: BorderRadius.circular(30),
+              color: Color.fromARGB(224, 15, 14, 14),
+
+              boxShadow: [
+                      BoxShadow(blurRadius: 7,
+                      color: Color.fromARGB(32, 85, 83, 83).withOpacity(0.5),
+                      blurStyle: BlurStyle.inner,
+                      spreadRadius: 1
+                      )]
+
+                      
+                      
+                      
+                      
+                      
             ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 150),
-            child: Text(
-              "Here's your task list:",
-              style: GoogleFonts.lato(
-                  textStyle: TextStyle(color: Colors.white, fontSize: 15)),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(width: 15),
+                    Text(
+                      "Task Manager",
+                      style: GoogleFonts.lato(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w300,
+                          color: Colors.white),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      iconSize: 20,
+                      color: Colors.white,
+                      onPressed: () {
+                        showmodealsheet(
+                          
+                        );
+                      },
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Container(
+                  width: 350,
+                  height: 120,
+                  
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Color.fromARGB(255, 4, 4, 80),Color.fromARGB(255, 124, 10, 145)],
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(blurRadius: 7,
+                      color: const Color.fromARGB(33, 0, 0, 0).withOpacity(0.5),
+                      
+                      spreadRadius: 1
+                      
+                      )
+                
+                    ],
+                    borderRadius: BorderRadius.circular(15),
+                              ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 100),
+                        child: FadeTransition(
+                          opacity: _animation,
+                          child: Text(
+                            "Hi Aditya!",
+                            style: GoogleFonts.lato(
+                                fontSize: 50,
+                                fontWeight: FontWeight.normal,
+                                color: Color.fromARGB(255, 255, 255, 255)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 150),
+                        child: Text(
+                          "Here's your task list:",
+                          style: GoogleFonts.lato(
+                              textStyle: TextStyle(color: Colors.white70, fontSize: 15)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(

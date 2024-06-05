@@ -75,6 +75,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
     final taskdate = selectedDate ?? initialTask?.date;
     final hour = selectedTime?.hour ?? initialTask?.hour;
     final min = selectedTime?.minute ?? initialTask?.min;
+    
 
     if (taskname.isEmpty || taskdescription.isEmpty || taskdate == null || hour == null || min == null) {
       print('Please fill in all fields.');
@@ -87,7 +88,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
       date: taskdate,
       hour: hour,
       min: min,
-      id: initialTask?.id ?? '', // For new tasks, the ID will be updated later
+      id: initialTask?.id ?? '', 
       hourcheck: hour,
     );
 
@@ -119,15 +120,15 @@ class _NewEntryState extends ConsumerState<NewEntry> {
         url,
         headers: {'Content-type': 'application/json'},
          body: json.encode({
-          'taskname': initialTask?.taskname ?? _taskNameController.text,
+          'taskname':  _taskNameController.text,
           'description':
-              initialTask?.description ?? _taskDescriptionController.text,
-          'date': selectedDate ?? initialTask?.date,
-          'hour': selectedTime?.hour ?? initialTask!.hour,
-          'min': selectedTime?.minute ?? initialTask!.min,
-          'hourcheck': selectedTime?.hour ?? initialTask?.hour,
+             _taskDescriptionController.text,
+          'date': formatter.format(selectedDate!)  ,
+          'hour': selectedTime!.hour ,
+          'min': selectedTime!.minute ,
+          'hourcheck': selectedTime!.hour ,
 
-          // Firebase will generate the ID
+          
         }),
       );
 
@@ -139,7 +140,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
       final data = json.decode(response.body) as Map<String, dynamic>;
       final String id = data['name'];
 
-      newTask.id = id; // Update the task with the generated ID
+      newTask.id = id; 
       ref.read(taskprovider.notifier).addTask(newTask);
     }
 
@@ -185,6 +186,7 @@ class _NewEntryState extends ConsumerState<NewEntry> {
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 child: TextField(
+                  
                   controller: _taskDescriptionController,
                   maxLines: 6,
                   minLines: 1,

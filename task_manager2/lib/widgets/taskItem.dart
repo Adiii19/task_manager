@@ -47,7 +47,7 @@ class _TaskitemState extends ConsumerState<Taskitem> {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: InkWell(
-        // onDoubleTap: () => onremove,
+       
         onTap: (){
       final task= widget.task;
    
@@ -57,7 +57,8 @@ class _TaskitemState extends ConsumerState<Taskitem> {
         context: context,
         useSafeArea: true,
         isScrollControlled: true,
-        backgroundColor: Color.fromARGB(255, 24, 24, 24),
+        constraints: BoxConstraints.expand(),
+        backgroundColor: Color.fromARGB(240, 15, 14, 14),
         builder: (BuildContext context) => NewEntry(
             initialtask: task,
         ));
@@ -115,8 +116,15 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                   ),
                   Container(
                     decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color.fromARGB(33, 0, 0, 0),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                        )
+                      ],
                         borderRadius: BorderRadius.circular(15),
-                        color: Colors.white38),
+                        color: Color.fromARGB(33, 0, 0, 0)),
                     child: Column(
                       children: [
                         Center(
@@ -144,7 +152,7 @@ class _TaskitemState extends ConsumerState<Taskitem> {
                           
                           children: [
                             Padding(
-                        padding: const EdgeInsets.only(left: 10,right: 45),
+                        padding: const EdgeInsets.only(left: 10,right: 60),
                         child: IconButton(
                             onPressed: () {
                              removeItem(widget.task);
